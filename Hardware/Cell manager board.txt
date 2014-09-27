@@ -1,0 +1,2 @@
+Reading netlist file "C:\Marshall Scholz\Documents\kicad\BMS project\OpenBMS\Hardware\Cell manager board\Open source BMS.net".
+Using component footprint link file "C:\Marshall Scholz\Documents\kicad\BMS project\OpenBMS\Hardware\Cell manager board\Open source BMS.cmp".
