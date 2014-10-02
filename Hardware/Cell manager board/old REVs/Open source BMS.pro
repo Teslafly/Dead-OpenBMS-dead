@@ -1,4 +1,4 @@
-update=9/26/2014 9:38:38 PM
+update=9/26/2014 1:28:27 AM
 version=1
 last_client=pcbnew
 [general]
@@ -53,7 +53,7 @@ LibName30=valves
 version=1
 PageLayoutDescrFile=
 LastNetListRead=Open source BMS.net
-UseCmpFile=0
+UseCmpFile=1
 PadDrill=0.6
 PadDrillOvalY=0.6
 PadSizeH=1.5
