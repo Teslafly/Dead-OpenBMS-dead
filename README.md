@@ -46,7 +46,7 @@ MicroMaster Features (plannned)
 * Runs completely off power output from slave board/s - any extra modules must consume less that 10ma or be run off an external voltage supply.
 * 2 dedicated current sensor inputs
 * 2 mosfet controlled outputs
-* SD card slot for datalogging
+* SD card slot for datalogging (may be removed, sd cards take a lot of power)
 * Opto isolators for controlling charger or communicating to voltage shifted masters. - all serial communication will be isolated.
 * Connectors for an i2c/serial LCD dashboard (will not be able to supply power) and all extra pins broken out for auxiliary I/O.
 * Analog and pwm throttle input & output. This can map the throttle to different values, change a analog signal to a pwm one, or/and cut/hold back throttle when the pack is almost empty/dead.
