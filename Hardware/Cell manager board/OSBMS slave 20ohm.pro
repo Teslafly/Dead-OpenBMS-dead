@@ -1,4 +1,4 @@
-update=10/9/2014 9:02:32 PM
+update=10/12/2014 3:16:28 AM
 version=1
 last_client=pcbnew
 [general]
@@ -49,3 +49,23 @@ LibName27=opto
 LibName28=atmel
 LibName29=contrib
 LibName30=valves
+[pcbnew]
+version=1
+PageLayoutDescrFile=
+LastNetListRead=OSBMS slave 20ohm.net
+UseCmpFile=1
+PadDrill=0
+PadDrillOvalY=0
+PadSizeH=0.24892
+PadSizeV=0.59944
+PcbTextSizeV=1.5
+PcbTextSizeH=1.5
+PcbTextThickness=0.3
+ModuleTextSizeV=1
+ModuleTextSizeH=1
+ModuleTextSizeThickness=0.15
+SolderMaskClearance=0
+SolderMaskMinWidth=0
+DrawSegmentWidth=0.2
+BoardOutlineThickness=0.09999999999999999
+ModuleOutlineThickness=0.15
