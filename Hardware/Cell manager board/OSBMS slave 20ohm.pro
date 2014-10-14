@@ -1,4 +1,4 @@
-update=10/12/2014 3:16:28 AM
+update=10/13/2014 5:37:35 PM
 version=1
 last_client=pcbnew
 [general]
@@ -53,11 +53,11 @@ LibName30=valves
 version=1
 PageLayoutDescrFile=
 LastNetListRead=OSBMS slave 20ohm.net
-UseCmpFile=1
-PadDrill=0
-PadDrillOvalY=0
-PadSizeH=0.24892
-PadSizeV=0.59944
+UseCmpFile=0
+PadDrill=0.635
+PadDrillOvalY=0.635
+PadSizeH=0.889
+PadSizeV=0.889
 PcbTextSizeV=1.5
 PcbTextSizeH=1.5
 PcbTextThickness=0.3

@@ -1245,4 +1245,15 @@ Text Notes 9400 5300 0    60   ~ 0
 To lower board / master
 Text Notes 9450 2650 0    60   ~ 0
 To higher board / terminator
+$Comp
+L GNDPWR #PWR?
+U 1 1 543C5063
+P 10550 5650
+F 0 "#PWR?" H 10550 5700 40  0001 C CNN
+F 1 "GNDPWR" H 10550 5570 40  0000 C CNN
+F 2 "" H 10550 5650 60  0000 C CNN
+F 3 "" H 10550 5650 60  0000 C CNN
+	1    10550 5650
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
