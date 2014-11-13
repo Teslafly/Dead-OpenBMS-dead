@@ -1,6 +1,6 @@
-update=11/12/2014 10:52:44 PM
+update=11/12/2014 10:57:37 PM
 version=1
-last_client=eeschema
+last_client=pcbnew
 [general]
 version=1
 RootSch=
@@ -10,29 +10,9 @@ version=1
 NetIExt=net
 [cvpcb/libraries]
 EquName1=devcms
-[pcbnew]
-version=1
-PageLayoutDescrFile=
-LastNetListRead=OSBMS slave 20ohm.net
-UseCmpFile=0
-PadDrill=0.635
-PadDrillOvalY=0.635
-PadSizeH=0.889
-PadSizeV=0.889
-PcbTextSizeV=1.5
-PcbTextSizeH=1.5
-PcbTextThickness=0.3
-ModuleTextSizeV=1
-ModuleTextSizeH=1
-ModuleTextSizeThickness=0.15
-SolderMaskClearance=0
-SolderMaskMinWidth=0
-DrawSegmentWidth=0.2
-BoardOutlineThickness=0.09999999999999999
-ModuleOutlineThickness=0.15
 [eeschema]
 version=1
-LibDir=
+LibDir=../Cell manager board
 [eeschema/libraries]
 LibName1=power
 LibName2=device
@@ -64,3 +44,23 @@ LibName27=opto
 LibName28=atmel
 LibName29=contrib
 LibName30=valves
+[pcbnew]
+version=1
+PageLayoutDescrFile=
+LastNetListRead=OSBMS MicroMaster atmega328_noIso.net
+UseCmpFile=0
+PadDrill=0.6
+PadDrillOvalY=0.6
+PadSizeH=1.5
+PadSizeV=1.5
+PcbTextSizeV=1.5
+PcbTextSizeH=1.5
+PcbTextThickness=0.3
+ModuleTextSizeV=1
+ModuleTextSizeH=1
+ModuleTextSizeThickness=0.15
+SolderMaskClearance=0
+SolderMaskMinWidth=0
+DrawSegmentWidth=0.2
+BoardOutlineThickness=0.09999999999999999
+ModuleOutlineThickness=0.15
