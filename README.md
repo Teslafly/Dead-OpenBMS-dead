@@ -70,7 +70,7 @@ Slave Board Features (plannned)
 
 software Goals
 ===========
-* Readout of all individual cell voltages and analog inputs
+* ~Readout of all individual cell voltages and analog inputs ~ DONE! (It could probably be made more efficient though)
 * Manually control system outputs 
 * Dataloggging, including current, cell voltages, and recording of total time the balance resistor has been on for each cell. useful for identifying weak/strong cells.
 * Cell resistance estimate - use amperage draw and cell voltages to estimate cell resistances.
@@ -86,7 +86,7 @@ Photos
 
 TODO:
 ===============
-* Actually write code for the thing
+* ~Actually write code for the thing~ DONE!
 * finish and post the micromaster board
 * make a separate folder for all the kicad libraries and 3d models used in the project
 * write a blog post on teslafly.wordpress.com detailing this project.
