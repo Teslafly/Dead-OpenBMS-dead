@@ -75,21 +75,17 @@ const byte DataRd16Burst = 0X7F;     // burst access to all channels (6 voltage,
 // higher level functions that achieve base functionality.
 void ATA68_initialize(int expectedBoardCount){
   pinMode(ATA_CS, OUTPUT);
-  digitalWrite(ATA_CS, HIGH); // end spi transfer by deselecting chip
-  SPI.begin();
   SPI.setClockDivider(SPI_CLOCK_DIV128); // slowest clock possible, 62.5khz with an 8 mhz avr on 3.3v. chip clock is 500khz and spi clock must be at least half that. and lower the more chips are added to the bus.
   SPI.setBitOrder(MSBFIRST);
   SPI.setDataMode(3);
   
-  // different way of inaiatalising spi. not used for now.  SPCR = ((1<<SPE)|(1<<MSTR)|(0<<SPR1)|(1<<SPR0)|(1<<CPOL)|(1<<CPHA));  // SPI enable, MSB first, Master, f/16, SPI Mode 1
+  //SPCR = ((1<<SPE)|(1<<MSTR)|(0<<SPR1)|(1<<SPR0)|(1<<CPOL)|(1<<CPHA));  // SPI enable, MSB first, Master, f/16, SPI Mode 1
   
   #ifdef CHECKSUM_ENABLED
   ATA68_WRITE(0, Ctrl, 0x20); // set control register with chechsum bit enabled (1)
   #else 
   ATA68_WRITE(0, Ctrl, 0x00); // set control register with checksum bit disabled (0)
   #endif
-  
-  //attachInterrupt( IRQ_INT, ATA68_IRQroutine, RISING); // attach function to interrupt. not needed at this point
   
   // should set the undervoltage threshold here too.
 }
@@ -124,7 +120,7 @@ byte ATA68_StartupInfo(boolean sendInfo){// reads chip id, scans the bus, gets u
   return errorCode;
 }
 
-int ATA68_readCell(byte cell, byte board){ // reads individual cell - this works!
+int ATA68_readCell(byte cell, byte board){ // reads individual cell
   // useage
   // cell -- cell number, 0 to 5. 6 if you want to read temperature, 7 if you want to read the lft 
   // board -- board number, 0 to 15
@@ -138,7 +134,7 @@ int ATA68_readCell(byte cell, byte board){ // reads individual cell - this works
 
   byte *buffer = ATA68_READ(board, DataRd16, 2);
   
-  voltage = (buffer[0] * 256) + buffer[1]; // convert the 2 buffer bytes into one 16 bit voltage value.
+ voltage = (buffer[0] * 256) + buffer[1]; // convert the 2 buffer bytes into one 16 bit voltage value.
  }else{
   voltage = 0; // if error checking fails, return somthing clearly out of range.
  }
@@ -169,7 +165,7 @@ byte *buffer = ATA68_READ(board, DataRd16Burst, 14);
 ////////////////////////////////////////
 // function to compare the voltages of the cells and balance them
 ////////////////////////////////////////
-void ATA68_balance(int balanceVoltage, int maxDutyCycle){ // still figuring out how I want to do balancing.
+void ATA68_balance(int balanceVoltage, int maxDutyCycle){
   
 }
 
@@ -202,7 +198,6 @@ boolean ATA68_GetBit(byte device, byte address, byte bitNum){ // returns selecte
  byte buffer = ATA68_READ(device, address, 1)[0];
 
  // somting here that extracts the correct bit out of buffer.
- // i'm not putting it here beacuse i'm lazy and don't feel like thinking hard at the moment.
 
  return returnbit; 
 }
@@ -212,20 +207,14 @@ boolean ATA68_GetBit(byte device, byte address, byte bitNum){ // returns selecte
 // base hardware call functions
 //////////////////////////////////////////////////////////////////////////
 
-
-
-
-void ATA68_IRQroutine(){ // attached to irq pin via interrupt and runs when pin triggers. Still figuring out what I want to do with this.
-Serial.print("irqTrigger");
-
-}
-
-/////////////////////////////////////////////
 // order of commands to ata68. data is sent from top to bottom.
 //[chipId - returns irq. 16 bits]
 //[control - returns nothing. 8 bits]
 //[data - returns data if being read. returns nothing if being written. 8-112bits read. 8-16 bits write.]
 //[checksum. optional. always sent by microcontroller when active]
+
+
+
 
 //////////////////////////////////////////////
 // function for pushing data to the ata6870n. Only accepts 8 bit values.
@@ -234,29 +223,21 @@ Serial.print("irqTrigger");
   // control = adress of the register we want to write/read data from. The last bit is the read/write control. (0 for read)
   // data = the data we want to send to the ata68.
 
+
   word stackAddress = 0x0001 << device; // Address of selected chip. First byte is shifted left once for each chip increment
   byte control = (address << 1)| 1; // shift register address one over to make room for read/write bit. [1 for write, 0 for read]
-  //control = control | (accessDir << 0); // set read write bit. not sure if needed or if this can be done in last problem
+  //control = control | (accessDir << 0); // set read write bit. not sure if needed or if this can be done in last problem.
+
 
   SPI.transfer(B0000);// somthing that pulses out 4+ clock ticks ptobably needs to go here according to the datasheet.
   digitalWrite(ATA_CS, LOW);  // start spi transfer by selecting chip
 
-    //select device#, recieve irq data, and add activated irq bits to the irqStore "list"
-    irqStore = irqStore | (SPI.transfer(highByte(stackAddress) * 256)); // transcieve first address byte
-    irqStore = irqStore | SPI.transfer(lowByte(stackAddress)); // trancieve second adress byte. 
+    irqString = SPI.transfer(stackAddress); // select chip and recieve irq data.
     SPI.transfer(control); //select register and set r/w bit
-    SPI.transfer(data); // this can't send 16 bytes nessasary for the undervoltage function. get that working seperately.
-    
-    #ifdef CHECKSUM_ENABLED
-    SPI.transfer(ATA68_genLFSR(control, data)); // send back checksum. currently not working, do not enable.
-    #endif
+    SPI.transfer(data); // this could accidently send 16 bits instead of 8. test and fix this.
   
   digitalWrite(ATA_CS, HIGH); // end spi transfer by deselecting chip
   SPI.transfer(B0000);// somthing that pulses out 4+ clock ticks ptobably needs to go here according to the datasheet.
-  
-  #ifdef SLOWCOMMS
-  delay(2000); // debugging stuff. makes datasniffing easier.
-  #endif
 }
 
 
@@ -266,48 +247,38 @@ Serial.print("irqTrigger");
 ///////////////////////////////////////////////////////////
 // function for getting data out of the ata6870n
 byte *ATA68_READ (byte device, byte address, byte Length ){
-  // device = device number. device 0-15. will return an error if input is not within this value.
-  // address = adress of the register we want to write/read data from. The last bit is the read/write control. (0 for read)
-  // recievedLength = If I am recieving data how many bytes should I recieve? Also automatically adds padding to push bits out.
+// device = device number. device 0-15. will return an error if input is not within this value.
+// address = adress of the register we want to write/read data from. The last bit is the read/write control. (0 for read)
+// recievedLength = If I am recieving data how many bytes should I recieve? Also automatically adds padding to push bits out.
 
-  byte buffer[Length]; // recieved values will be stored here.
+byte buffer[Length]; // recieved values will be stored here.
 
-  word stackAddress = 0x0001 << device; // Address of selected chip. First byte is shifted left once for each chip increment
-  byte control = (address << 1)| 0; // shift register address one over to make room for read/write bit. [1 for write, 0 for read]
-  //control = control | (accessDir << 0); // set read write bit. not sure if needed or if this can be done in last problem.
+word stackAddress = 0x0001 << device; // Address of selected chip. First byte is shifted left once for each chip increment
+byte control = (address << 1)| 0; // shift register address one over to make room for read/write bit. [1 for write, 0 for read]
+//control = control | (accessDir << 0); // set read write bit. not sure if needed or if this can be done in last problem.
 
 
 
-  SPI.transfer(B0000);// somthing that pulses out 4+ clock ticks before communication needs to go here according to the datasheet.
-  digitalWrite(ATA_CS, LOW);  // start spi transfer by selecting chip
+SPI.transfer(B0000);// somthing that pulses out 4+ clock ticks before communication needs to go here according to the datasheet.
+digitalWrite(ATA_CS, LOW);  // start spi transfer by selecting chip
 
-    //select device#, recieve irq data, and add activated irq bits to the irqStore "list"
-    irqStore = irqStore | (SPI.transfer(highByte(stackAddress) * 256)); // transcieve first address byte
-    irqStore = irqStore | SPI.transfer(lowByte(stackAddress)); // trancieve second adress byte. 
-    SPI.transfer(control); //select register and set r/w bit
+irqString = SPI.transfer(stackAddress); // select chip and recieve irq data.
+SPI.transfer(control); //select register and set r/w bit
 
-    for (int i = 1; i <= Length; i++) {  //recieve actual data
-      buffer[i] = SPI.transfer(0x00);
-    }
-    
-    #ifdef CHECKSUM_ENABLED
-    SPI.transfer(ATA68_genLFSR(control, buffer)); // send back checksum. currently not working, do not enable.
-    #endif
-    
-    
+for (int i = 1; i <= Length; i++) {  //recieve actual data
+    buffer[i] = SPI.transfer(0x00);
+  }
   
-  digitalWrite(ATA_CS, HIGH); // end spi transfer by deselecting chip
-  SPI.transfer(B0000);// somthing that pulses out 4+ clock ticks after communication needs to go here according to the datasheet.
+digitalWrite(ATA_CS, HIGH); // end spi transfer by deselecting chip
+SPI.transfer(B0000);// somthing that pulses out 4+ clock ticks after communication needs to go here according to the datasheet.
 
-  #ifdef SLOWCOMMS
-  delay(2000); // debugging stuff. makes datasniffing easier.
-  #endif
 
-  return buffer; //return recieved data array
+// should I make irqstring a global variable so the main program can access it whenever on the next loop? Am I even going to implemennt interrupts?
+return buffer; // change how info is returned so stuff doesn't conflict.
 }
 
 /*
-byte ATA68_genLFSR(data){ // Generate the lfsr based checksum. I have much more research to do with this.
+byte ATA68_generateCRC(data){
   
   
 }

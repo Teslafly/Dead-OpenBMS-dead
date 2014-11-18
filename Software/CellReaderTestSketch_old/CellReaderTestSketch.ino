@@ -1,4 +1,3 @@
-
 /*
 This program is meant as a proof of concept test for the ATA6870N bms chip. 
 as of now it just reads and prints out cell voltages for the specified amount of modules, and 
@@ -20,7 +19,6 @@ funcionns  that are planned to be implemented are,
 --cell internal resistance estimation with current sensor?
 --cumulative mah drawn/added from pack and #of charge cycles stored in eeprom(not including motor regen-- hopefully)
 --add detection for when one of the ata68 chips becomes unconnected and is not the number of cells this program is made for.
---add some sort of initalisation error detection.
 
 goal for program as of now is to get communication working where I can read all the cell voltages/temeratures and control the cell discharge resistors on one ata68. (the first one, for loops to access all of them will come later.)
 
@@ -37,12 +35,12 @@ formatting
 
 // variables ///////////////////////////////
 int cellvoltage[CELLCOUNT];// array to store all the cellvoltages.
-int irqStore; // global variable to store irq results. make this not be overwritten each spi transfer, but rather added to until it is read and cleared. (if interrupts are used at all)
+int irqString; // global variable to store irq results. make this not be overwritten each spi transfer, but rather added to until it is read and cleared. (if interrupts are used at all)
 byte mode = 0;// system modes. modes listed below // not used right now.
 // 0 == waiting. system is starting up and not ready for user input/output.
 // 1 == ready. system is ready for user input
 // 2 == error. an error has been detected and the system has halted.- make sure the system can override faults and continue working for safety reasons.
-// 3 == balalcing. system has detected that the battery is charging and that cells have passed a balancing threshold.
+// 3 == balalcing. system has detected that the bayyery is charging and that cells have passed a balancing threshold.
 // 4 ==
 // 5 == sleep. system is asleep and will wakeup once an interval timer has elapsed.
 
@@ -74,7 +72,7 @@ void setup(){
 // read and report cell voltages
 void loop(){
    
-    for(int i=0; i<= BOARDCOUNT; i++) { // read all cell voltages. (yes I know this is horribly innefficent, but it will have to suffice until I get burstmode working.)
+    for(int i=0; i<= BOARDCOUNT; i++) { // read all cell voltages
     
     for(int c=0; c<6; c++){
     cellvoltage[6*i+c] = ATA68_readCell(c,i);
@@ -92,12 +90,7 @@ void loop(){
   Serial.println(cellvoltage[i]);
   }
   
-  Serial.println("debug info");
-  Serial.print("irqStore = ");
-  Serial.println(irqStore);
-  irqStore = 0X0000; // empty irqsotore to make room for new data. Nothing else is done with this for now.
   
-  //Serial.print("other debug stuff that may be of use goes here");
   
   
   delay(1000);

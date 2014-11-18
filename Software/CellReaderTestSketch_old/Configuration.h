@@ -1,13 +1,12 @@
 /* 
 configuration file. 
-this file contains pinouts, battery chemistry specific settings, and other important configurations.
+this file contains pinouts, battery chemistry specific settings, and otherr things
 */
 
 // system configuration ////////////////////////////
 #define baudrate 9600  // serial baudrate. default: 9600 
 #define DEBUG_INFO 1 // prints debug info if set to 1. stops transmissoon of boot up matadata if set to "0".
 //#define CHECKSUM_ENABLED  // enables chcksum on spi communication with ata68. not currently supported.
-#define SLOWCOMMS // places a delay after any SPI communication to make it easier to troupleshoot with a logic analyser. for testing only.
 //#define SAFETY_NOSHOUTDOWN // disables system shutdown in case of a fault. You would use this for safety critical applications where the vehicle can NOT be shut down.
 
 // battery specific settings ///////////////////////
@@ -58,7 +57,7 @@ this file contains pinouts, battery chemistry specific settings, and other impor
 
 // Analog
 #define SYS_VOLTAGE 10 // minimum system voltage until it will go into an error state and disable some functions until proper voltage is restored.
-#define SYS_VOLTPIN 4 // analog pin 1 for onboard voltage. usually 12-24v
+#define SYS_VOLTPIN // analog pin 1 for onboard voltage. usually 12-24v
 
 
 #endif
