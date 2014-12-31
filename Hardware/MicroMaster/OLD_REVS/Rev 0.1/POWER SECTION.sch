@@ -1,0 +1,397 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:special
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:Open source BMS
+LIBS:OSBMS MicroMaster atmega328-cache
+EELAYER 25 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 2 2
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L FDS6892A Q?
+U 1 1 5440B423
+P 8900 5400
+F 0 "Q?" H 8900 5251 40  0000 R CNN
+F 1 "FDS6892A" H 8900 5550 40  0000 R CNN
+F 2 "SO8" H 8770 5502 25  0000 C CIN
+F 3 "" H 8900 5400 60  0000 C CNN
+	1    8900 5400
+	1    0    0    -1  
+$EndComp
+$Comp
+L FDS6892A Q?
+U 1 1 5440B42A
+P 10050 5600
+F 0 "Q?" H 10050 5451 40  0000 R CNN
+F 1 "FDS6892A" H 10050 5750 40  0000 R CNN
+F 2 "SO8" H 9920 5702 25  0000 C CIN
+F 3 "" H 10050 5600 60  0000 C CNN
+	1    10050 5600
+	1    0    0    -1  
+$EndComp
+Text GLabel 8350 5450 0    60   Input ~ 0
+D5*
+Text GLabel 9500 5650 0    60   Input ~ 0
+D6*
+$Comp
+L CONN_01X04 P?
+U 1 1 5440B433
+P 10800 5200
+F 0 "P?" H 10800 5450 50  0000 C CNN
+F 1 "CONN_01X04" V 10900 5200 50  0000 C CNN
+F 2 "" H 10800 5200 60  0000 C CNN
+F 3 "" H 10800 5200 60  0000 C CNN
+	1    10800 5200
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9500 5650 9850 5650
+Wire Wire Line
+	8350 5450 8700 5450
+$Comp
+L R R?
+U 1 1 5440B446
+P 9850 5850
+F 0 "R?" V 9930 5850 40  0000 C CNN
+F 1 "10K" V 9857 5851 40  0000 C CNN
+F 2 "Resistors_SMD:R_0603" V 9780 5850 30  0000 C CNN
+F 3 "" H 9850 5850 30  0000 C CNN
+	1    9850 5850
+	0    1    1    0   
+$EndComp
+$Comp
+L R R?
+U 1 1 5440B44D
+P 8700 5650
+F 0 "R?" V 8780 5650 40  0000 C CNN
+F 1 "10K" V 8707 5651 40  0000 C CNN
+F 2 "Resistors_SMD:R_0603" V 8630 5650 30  0000 C CNN
+F 3 "" H 8700 5650 30  0000 C CNN
+	1    8700 5650
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	9550 5650 9550 5850
+Wire Wire Line
+	9550 5850 9600 5850
+Connection ~ 9550 5650
+Wire Wire Line
+	8400 5450 8400 5650
+Wire Wire Line
+	8400 5650 8450 5650
+Connection ~ 8400 5450
+Wire Wire Line
+	8950 5650 9000 5650
+Wire Wire Line
+	9000 5600 9000 5750
+Wire Wire Line
+	10100 5850 10150 5850
+Wire Wire Line
+	10150 5800 10150 5950
+$Comp
+L GND #PWR?
+U 1 1 5440B45E
+P 9000 5750
+F 0 "#PWR?" H 9000 5750 30  0001 C CNN
+F 1 "GND" H 9000 5680 30  0001 C CNN
+F 2 "" H 9000 5750 60  0000 C CNN
+F 3 "" H 9000 5750 60  0000 C CNN
+	1    9000 5750
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 5440B464
+P 10150 5950
+F 0 "#PWR?" H 10150 5950 30  0001 C CNN
+F 1 "GND" H 10150 5880 30  0001 C CNN
+F 2 "" H 10150 5950 60  0000 C CNN
+F 3 "" H 10150 5950 60  0000 C CNN
+	1    10150 5950
+	1    0    0    -1  
+$EndComp
+Connection ~ 10150 5850
+Connection ~ 9000 5650
+Wire Wire Line
+	10150 5350 10600 5350
+Wire Wire Line
+	10150 5350 10150 5400
+Wire Wire Line
+	10250 5400 10250 5350
+Connection ~ 10250 5350
+Wire Wire Line
+	9000 5150 10600 5150
+Wire Wire Line
+	9100 5150 9100 5200
+Connection ~ 9100 5150
+Wire Wire Line
+	9000 5150 9000 5200
+$Comp
+L CONN_01X04 P?
+U 1 1 5440B474
+P 10800 3650
+F 0 "P?" H 10800 3900 50  0000 C CNN
+F 1 "CONN_01X04" V 10900 3650 50  0000 C CNN
+F 2 "" H 10800 3650 60  0000 C CNN
+F 3 "" H 10800 3650 60  0000 C CNN
+	1    10800 3650
+	1    0    0    -1  
+$EndComp
+$Comp
+L BSS138 Q?
+U 1 1 5440B47B
+P 9750 3950
+F 0 "Q?" H 9750 3801 40  0000 R CNN
+F 1 "BSS138" H 9750 4100 40  0000 R CNN
+F 2 "SOT-23" H 9620 4052 29  0000 C CNN
+F 3 "" H 9750 3950 60  0000 C CNN
+	1    9750 3950
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 5440B482
+P 10550 4450
+F 0 "#PWR?" H 10550 4450 30  0001 C CNN
+F 1 "GND" H 10550 4380 30  0001 C CNN
+F 2 "" H 10550 4450 60  0000 C CNN
+F 3 "" H 10550 4450 60  0000 C CNN
+	1    10550 4450
+	1    0    0    -1  
+$EndComp
+Text Notes 10400 3500 2    60   ~ 0
+precharge relay \n& voltage sense
+Wire Wire Line
+	10600 3800 10550 3800
+Wire Wire Line
+	9850 4150 9850 4350
+Wire Wire Line
+	9850 3600 9850 3750
+$Comp
+L +12V #PWR?
+U 1 1 5440B49C
+P 9800 1650
+F 0 "#PWR?" H 9800 1600 20  0001 C CNN
+F 1 "+12V" H 9800 1750 30  0000 C CNN
+F 2 "" H 9800 1650 60  0000 C CNN
+F 3 "" H 9800 1650 60  0000 C CNN
+	1    9800 1650
+	1    0    0    -1  
+$EndComp
+$Comp
+L +12V #PWR?
+U 1 1 5440B4A9
+P 10550 3450
+F 0 "#PWR?" H 10550 3400 20  0001 C CNN
+F 1 "+12V" H 10550 3550 30  0000 C CNN
+F 2 "" H 10550 3450 60  0000 C CNN
+F 3 "" H 10550 3450 60  0000 C CNN
+	1    10550 3450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10550 3450 10550 3500
+Wire Wire Line
+	10550 3500 10600 3500
+Wire Wire Line
+	10600 3600 9850 3600
+Text GLabel 10100 3700 0    60   Input ~ 0
+A1
+Text GLabel 9400 2300 0    60   Input ~ 0
+A0
+$Comp
+L R R?
+U 1 1 5440B4B4
+P 9800 2600
+F 0 "R?" V 9880 2600 40  0000 C CNN
+F 1 "5k ohm" V 9807 2601 40  0000 C CNN
+F 2 "Resistors_SMD:R_0603" V 9730 2600 30  0000 C CNN
+F 3 "" H 9800 2600 30  0000 C CNN
+	1    9800 2600
+	-1   0    0    1   
+$EndComp
+$Comp
+L R R?
+U 1 1 5440B4BC
+P 9800 2000
+F 0 "R?" V 9880 2000 40  0000 C CNN
+F 1 "50k ohm" V 9807 2001 40  0000 C CNN
+F 2 "Resistors_SMD:R_0603" V 9730 2000 30  0000 C CNN
+F 3 "" H 9800 2000 30  0000 C CNN
+	1    9800 2000
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	9800 2350 9800 2250
+Connection ~ 9800 2300
+$Comp
+L +12V #PWR?
+U 1 1 543EDB6F
+P 10550 4950
+F 0 "#PWR?" H 10550 4900 20  0001 C CNN
+F 1 "+12V" H 10550 5050 30  0000 C CNN
+F 2 "" H 10550 4950 60  0000 C CNN
+F 3 "" H 10550 4950 60  0000 C CNN
+	1    10550 4950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10600 5250 10550 5250
+Wire Wire Line
+	10550 5250 10550 4950
+Wire Wire Line
+	10600 5050 10550 5050
+Connection ~ 10550 5050
+$Comp
+L TVS D?
+U 1 1 543EE1B5
+P 10350 4000
+F 0 "D?" V 10500 4100 60  0000 C CNN
+F 1 "3.3v TVS" V 10200 4100 60  0000 C CNN
+F 2 "" H 10350 4000 60  0000 C CNN
+F 3 "" H 10350 4000 60  0000 C CNN
+	1    10350 4000
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	9850 4350 10550 4350
+Wire Wire Line
+	10350 4350 10350 4300
+Wire Wire Line
+	10550 3800 10550 4450
+Connection ~ 10350 4350
+Connection ~ 10550 4350
+Wire Wire Line
+	10100 3700 10600 3700
+Connection ~ 10350 3700
+$Comp
+L C C?
+U 1 1 543EF4B1
+P 10150 4000
+F 0 "C?" H 10150 4100 40  0000 L CNN
+F 1 "C" H 10156 3915 40  0000 L CNN
+F 2 "" H 10188 3850 30  0000 C CNN
+F 3 "" H 10150 4000 60  0000 C CNN
+	1    10150 4000
+	1    0    0    -1  
+$EndComp
+$Comp
+L C C?
+U 1 1 543EF553
+P 9550 2600
+F 0 "C?" H 9550 2700 40  0000 L CNN
+F 1 "C" H 9556 2515 40  0000 L CNN
+F 2 "" H 9588 2450 30  0000 C CNN
+F 3 "" H 9550 2600 60  0000 C CNN
+	1    9550 2600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10150 3800 10150 3700
+Connection ~ 10150 3700
+Wire Wire Line
+	10150 4200 10150 4350
+Connection ~ 10150 4350
+$Comp
+L GND #PWR?
+U 1 1 543F113E
+P 10200 3000
+F 0 "#PWR?" H 10200 3000 30  0001 C CNN
+F 1 "GND" H 10200 2930 30  0001 C CNN
+F 2 "" H 10200 3000 60  0000 C CNN
+F 3 "" H 10200 3000 60  0000 C CNN
+	1    10200 3000
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_01X02 P?
+U 1 1 543F286C
+P 10800 1750
+F 0 "P?" H 10800 1900 50  0000 C CNN
+F 1 "CONN_01X02" V 10900 1750 50  0000 C CNN
+F 2 "" H 10800 1750 60  0000 C CNN
+F 3 "" H 10800 1750 60  0000 C CNN
+	1    10800 1750
+	1    0    0    -1  
+$EndComp
+Text Notes 10000 1600 0    60   ~ 0
+12/24v aux \npower in
+Text Notes 10400 5050 2    60   ~ 0
+Auxilary power outputs\nFor contactor/ETC
+$Comp
+L CP1 C?
+U 1 1 54648767
+P 10200 2350
+F 0 "C?" H 10250 2450 50  0000 L CNN
+F 1 "CP1" H 10250 2250 50  0000 L CNN
+F 2 "" H 10200 2350 60  0000 C CNN
+F 3 "" H 10200 2350 60  0000 C CNN
+	1    10200 2350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10600 1800 10550 1800
+Wire Wire Line
+	9800 1650 9800 1750
+Wire Wire Line
+	10550 1800 10550 2900
+Wire Wire Line
+	9800 2900 9800 2850
+Wire Wire Line
+	10200 2150 10200 1700
+Connection ~ 10200 1700
+Wire Wire Line
+	9800 1700 10600 1700
+Wire Wire Line
+	10550 2900 9550 2900
+Wire Wire Line
+	10200 2550 10200 3000
+Connection ~ 10200 2900
+Wire Wire Line
+	9400 2300 9800 2300
+Wire Wire Line
+	9550 2300 9550 2400
+Wire Wire Line
+	9550 2900 9550 2800
+Connection ~ 9800 2900
+Connection ~ 9550 2300
+Connection ~ 9800 1700
+$EndSCHEMATC
