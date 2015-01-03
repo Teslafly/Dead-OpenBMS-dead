@@ -42,7 +42,7 @@ Error codes // not quite working as of yet.
 // ata6870n register mapping
 const byte RevID = 0X00;             // Revision ID/value Mfirst, pow_on [-R 8bit]
 const byte Ctrl = 0X01;              // control register [-RW 8bit]
-const byte Operation = 0X02;         // operation request [-RW 8bit]
+const byte OpReq = 0X02;         // operation request [-RW 8bit]
 const byte Opstatus = 0X03;          // operation status [-R 8bit]
 const byte Rstr = 0X04;              // software reset [-W 8bit]
 const byte IrqMask = 0X05;           // mask interrupt sources [-RW 8bit]
@@ -65,6 +65,8 @@ struct BurstDataType{
   uint16_t channel1;
   uint16_t temperature;
  };
+ 
+ BurstDataType BurstRx;
 
  // status register bits.
  //bit 1 = dataRdy    -> Conversion finished
@@ -131,9 +133,24 @@ byte ATA68_StartupInfo(boolean sendInfo){// reads chip id, scans the bus, gets u
   // get the rest of the useful settings
   // parse out useful settings and store then in the array.
   
-  // always outputs at least 0. this is normal and means nothing is wrong. If the output is not 0 somthing is definately wrong.
+  // always outputs at least 0. This is normal and means nothing is wrong. If the output is not 0 something is definately wrong.
   return errorCode;
 }
+
+void selectTempSensor(boolean sensor, byte board){
+  // useage
+  // cell -- cell number, 0 to 5. 6 if you want to read temperature, 7 if you want to read the lft 
+  // board -- board number, 0 to 15
+  
+}
+  
+  /* ATA68_WRITE(byte board, OpReq, data);
+  
+} */
+
+
+
+
 
 int ATA68_readCell(byte cell, byte board){ // reads individual cell - this works!
   // useage
@@ -171,9 +188,12 @@ void ATA68_readAllvoltages(int cellcount){
 
 byte ATA68_bulkRead(byte board){
 
+  //BurstRx
 //ATA68_WRITE(); // get the board to collect data
 
 byte *buffer = ATA68_READ(board, DataRd16Burst, 14);
+
+//BurstRx
 }
 
 
@@ -248,11 +268,11 @@ Serial.print("irqTrigger");
   // control = adress of the register we want to write/read data from. The last bit is the read/write control. (0 for read)
   // data = the data we want to send to the ata68.
 
-  word stackAddress = 0x0001 << device; // Address of selected chip. First byte is shifted left once for each chip increment
-  byte control = (address << 1)| 1; // shift register address one over to make room for read/write bit. [1 for write, 0 for read]
+  uint16_t stackAddress = 0x0001 << device; // Address of selected chip. First byte is shifted left once for each chip increment
+  uint8_t control = (address << 1)| 1; // shift register address one over to make room for read/write bit. [1 for write, 0 for read]
   //control = control | (accessDir << 0); // set read write bit. not sure if needed or if this can be done in last problem
 
-  SPI.transfer(B0000);// somthing that pulses out 4+ clock ticks ptobably needs to go here according to the datasheet.
+  SPI.transfer(0x00);// somthing that pulses out 4+ clock ticks ptobably needs to go here according to the datasheet.
   digitalWrite(ATA_CS, LOW);  // start spi transfer by selecting chip
 
     //select device#, recieve irq data, and add activated irq bits to the irqStore "list"
@@ -266,7 +286,7 @@ Serial.print("irqTrigger");
     #endif
   
   digitalWrite(ATA_CS, HIGH); // end spi transfer by deselecting chip
-  SPI.transfer(B0000);// somthing that pulses out 4+ clock ticks ptobably needs to go here according to the datasheet.
+  SPI.transfer(0x00);// somthing that pulses out 4+ clock ticks ptobably needs to go here according to the datasheet.
   
   #ifdef SLOWCOMMS
   delay(2000); // debugging stuff. makes datasniffing easier.
@@ -286,8 +306,8 @@ byte *ATA68_READ (byte device, byte address, byte Length ){
 
   byte buffer[Length]; // recieved values will be stored here.
 
-  word stackAddress = 0x0001 << device; // Address of selected chip. First byte is shifted left once for each chip increment
-  byte control = (address << 1)| 0; // shift register address one over to make room for read/write bit. [1 for write, 0 for read]
+  uint16_t stackAddress = 0x0001 << device; // Address of selected chip. First byte is shifted left once for each chip increment
+  uint8_t control = (address << 1)| 0; // shift register address one over to make room for read/write bit. [1 for write, 0 for read]
   //control = control | (accessDir << 0); // set read write bit. not sure if needed or if this can be done in last problem.
 
 
@@ -328,9 +348,10 @@ byte ATA68_genLFSR(byte address, byte data[14]){ // Generate the lfsr based chec
   // output = LFSR chechsum
 
   // x^8+x^2+x+1
-  // bitstream in MSBF - xor - DR - xor - DR - xor - Dr - DR - DR - DR - DR - feedback to xor
+  // bitstream in MSBF - xor - DR - xor - DR - xor - DR - DR - DR - DR - DR - feedback to xor
 
-  byte LFSR; // byte to store / minipulate the lfsr output
+  byte LFSR; // byte to store & minipulate the lfsr output - should this be a bit feild?
+  
 
   for(int i=0; i<length; i++){
   

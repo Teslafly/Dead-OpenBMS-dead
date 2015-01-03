@@ -62,6 +62,7 @@ void setup(){
   if(Ecode > 0){ // print error code if error detected.
     Serial.print("Error: ");
     Serial.print(Ecode);
+    
     mode = 2; // set system to error mode.
     Serial.print("mode set to: mode =");
     Serial.print(mode);

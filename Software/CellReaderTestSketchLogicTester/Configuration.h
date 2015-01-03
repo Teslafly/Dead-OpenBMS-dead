@@ -1,17 +1,22 @@
 /* 
 configuration file. 
-this file contains pinouts, battery chemistry specific settings, and otherr things
+this file contains pinouts, battery chemistry specific settings, and other important configurations.
 */
 
 // system configuration ////////////////////////////
-#define baudrate 9600  // serial baudrate. default: 9600 
-#define DEBUG_INFO 1 // prints debug info if set to 1. stops transmissoon of boot up matadata if set to "0".
+#define baudrate 9600  // serial baudrate. default: 9600
+#define BLE_ENABLED 0 // enables nRF8001 BLE module for mobile device communication.
+#define SERIALBUFF 50 // buffer size for serial commands. This may be too large or too small.
+#define DEBUG_INFO 1 // prints debug info if set to "1". stops transmissoon of boot up matadata if set to "0".
+//#define TESTMODE //
 //#define CHECKSUM_ENABLED  // enables chcksum on spi communication with ata68. not currently supported.
-//#define SAFETY_NOSHOUTDOWN // disables system shutdown in case of a fault. You would use this for safety critical applications where the vehicle can NOT be shut down.
+//#define SLOWCOMMS // places a delay after any SPI communication to make it easier to troupleshoot with a logic analyser. for testing only.
+//#define SAFETY_NOSHOUTDOWN // disables system shutdown in case of a fault. You would use this for safety critical applications where the battery system can NOT be shut down.
 
 // battery specific settings ///////////////////////
-#define BOARDCOUNT 1 // # of ATA6870N attached in series
+#define BOARDCOUNT 2 // # of ATA6870N attached in series
 #define CELLCOUNT BOARDCOUNT * 6 // gets recieved # of cells. 6 per each board. do not disable unconnected cells here. May differ from actual cellcount. 
+#define EnableBalancing // enables balance function. board otherwise operates in a voltage sense only mode.
 // minvoltage(per cell)
 // maxvoltage(per cell
 // balancevoltage
