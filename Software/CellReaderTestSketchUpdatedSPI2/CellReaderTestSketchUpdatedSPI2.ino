@@ -62,8 +62,9 @@ String SerialBuffer = "";         // a string to hold incoming data
 boolean SerialComplete = false;  // whether the string is complete
 
 int cellvoltage[CELLCOUNT];// array to store all the cellvoltages.
+
 int irqStore; // global variable to store irq results. make this not be overwritten each spi transfer, but rather added to until it is read and cleared. (if interrupts are used at all)
-byte mode = 0;// system modes. modes listed below // not used right now.
+uint8_t mode = 0;// system modes. modes listed below // not used right now.
 // 0 == waiting. system is starting up and not ready for user input/output.
 // 1 == ready. system is ready for user input
 // 2 == error. an error has been detected and the system has halted.- make sure the system can override faults and continue working for safety reasons.
@@ -93,7 +94,7 @@ void setup(){
   delay(6000);
   
     // get system status
-    byte Ecode = ATA68_StartupInfo(DEBUG_INFO); //scan system and output useful data. Returns an error code if anything is wrong. 
+    uint8_t Ecode = ATA68_StartupInfo(DEBUG_INFO); //scan system and output useful data. Returns an error code if anything is wrong. 
     if(Ecode > 0){ // print error code if error detected.
       Serial.print("Error: ");
       Serial.print(Ecode);

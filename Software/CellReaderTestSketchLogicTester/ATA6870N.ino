@@ -56,7 +56,7 @@ const byte DataRd16 = 0X11;          // single access to selected channel value 
 const byte DataRd16Burst = 0X7F;     // burst access to all channels (6 voltage, 1 temperature) -R 112bit
 
 
-struct BurstDataType{
+typedef struct BurstDataType{
   uint16_t channel6;
   uint16_t channel5;
   uint16_t channel4;
@@ -64,9 +64,9 @@ struct BurstDataType{
   uint16_t channel2;
   uint16_t channel1;
   uint16_t temperature;
- };
+ }tBurstDataType;
  
- BurstDataType BurstRx;
+ tBurstDataType BurstRx;
 
  // status register bits.
  //bit 1 = dataRdy    -> Conversion finished
@@ -159,7 +159,7 @@ int ATA68_readCell(byte cell, byte board){ // reads individual cell - this works
  
   int voltage;
  
- if(cell >=0 || cell < 8){ // error checking. The first 5 msb's must remain 0.
+ if((cell >=0) && (cell < 8)){ // error checking. The first 5 msb's must remain 0.
   ATA68_WRITE(board, ChannelReadSel, cell); // get the board to collect data
   
   delay(10); //allow the chip to collect data. this value is not fine tuned and is only meant to allow this function to work.
@@ -193,6 +193,9 @@ byte ATA68_bulkRead(byte board){
 
 byte *buffer = ATA68_READ(board, DataRd16Burst, 14);
 
+tBurstDataType* pBatteryData = (tBurstDataType*) buffer;
+Serial.print(pBatteryData->temperature);
+
 //BurstRx
 }
 
@@ -225,7 +228,8 @@ ATA68_status(){
 }
 */
 
-boolean ATA68_GetBit(byte device, byte address, byte bitNum){ // returns selected bit from selected register.
+boolean ATA68_GetBit(byte device, byte address, byte bitNum)// returns selected bit from selected register.
+{ 
  // usage
  // register == register you wish to read
  // bit that you want to get. 0 = lsb, 7 = msb.
@@ -240,6 +244,21 @@ boolean ATA68_GetBit(byte device, byte address, byte bitNum){ // returns selecte
  return returnbit; 
 }
 
+void ATA68_ReadControlData ()
+{
+ /*
+ Reads control data from registers and populates a bitfeild. should also create a write function at some point.
+ registers read
+ const byte RevID = 0X00;             // Revision ID/value Mfirst, pow_on [-R 8bit]
+const byte Ctrl = 0X01;              // control register [-RW 8bit]
+const byte OpReq = 0X02;         // operation request [-RW 8bit]
+const byte Opstatus = 0X03;          // operation status [-R 8bit]
+const byte Rstr = 0X04;              // software reset [-W 8bit]
+const byte IrqMask = 0X05;           // mask interrupt sources [-RW 8bit]
+const byte statusReg = 0X06;         // status interrupt sources [-R 8bit]
+ 
+ */
+}
 
 //////////////////////////////////////////////////////////////////////////
 // base hardware call functions
@@ -248,7 +267,8 @@ boolean ATA68_GetBit(byte device, byte address, byte bitNum){ // returns selecte
 
 
 
-void ATA68_IRQroutine(){ // attached to irq pin via interrupt and runs when pin triggers. Still figuring out what I want to do with this.
+void ATA68_IRQroutine() // attached to irq pin via interrupt and runs when pin triggers. Still figuring out what I want to do with this.
+{ 
 Serial.print("irqTrigger");
 
 }
@@ -263,7 +283,8 @@ Serial.print("irqTrigger");
 
 //////////////////////////////////////////////
 // function for pushing data to the ata6870n. Only accepts 8 bit values.
- void ATA68_WRITE(byte device, byte address, byte data){
+ void ATA68_WRITE(byte device, byte address, byte data)
+ {
   // device = device number. device 0-15. will return an error if input is not within this value.
   // control = adress of the register we want to write/read data from. The last bit is the read/write control. (0 for read)
   // data = the data we want to send to the ata68.
@@ -282,7 +303,7 @@ Serial.print("irqTrigger");
     SPI.transfer(data); // this can't send 16 bytes nessasary for the undervoltage function. get that working seperately.
     
     #ifdef CHECKSUM_ENABLED
-    SPI.transfer(ATA68_genLFSR(control, data)); // send back checksum. currently not working, do not enable.
+    SPI.transfer(ATA68_genLFSR(control, &data)); // send back checksum. currently not working, do not enable.
     #endif
   
   digitalWrite(ATA_CS, HIGH); // end spi transfer by deselecting chip
@@ -299,11 +320,12 @@ Serial.print("irqTrigger");
 
 ///////////////////////////////////////////////////////////
 // function for getting data out of the ata6870n
-byte *ATA68_READ (byte device, byte address, byte Length ){
+byte *ATA68_READ (byte device, byte address, byte Length )
+{
   // device = device number. device 0-15. will return an error if input is not within this value.
   // address = adress of the register we want to write/read data from. The last bit is the read/write control. (0 for read)
   // recievedLength = If I am recieving data how many bytes should I recieve? Also automatically adds padding to push bits out.
-
+ // check if length is zero.
   byte buffer[Length]; // recieved values will be stored here.
 
   uint16_t stackAddress = 0x0001 << device; // Address of selected chip. First byte is shifted left once for each chip increment
@@ -316,7 +338,7 @@ byte *ATA68_READ (byte device, byte address, byte Length ){
   digitalWrite(ATA_CS, LOW);  // start spi transfer by selecting chip
 
     //select device#, recieve irq data, and add activated irq bits to the irqStore "list"
-    irqStore = irqStore | (SPI.transfer(highByte(stackAddress) * 256)); // transcieve first address byte
+    irqStore = irqStore | (SPI.transfer(highByte(stackAddress)) * 256); // transcieve first address byte
     irqStore = irqStore | SPI.transfer(lowByte(stackAddress)); // trancieve second adress byte. 
     SPI.transfer(control); //select register and set r/w bit
 
@@ -325,7 +347,7 @@ byte *ATA68_READ (byte device, byte address, byte Length ){
     }
     
     #ifdef CHECKSUM_ENABLED
-    SPI.transfer(ATA68_genLFSR(control, buffer)); // send back checksum. currently not working, do not enable.
+   //SPI.transfer(ATA68_genLFSR(control, &buffer)); // send back checksum. currently not working, do not enable.
     #endif
     
     
@@ -341,21 +363,52 @@ byte *ATA68_READ (byte device, byte address, byte Length ){
 }
 
 #ifdef CHECKSUM_ENABLED
-byte ATA68_genLFSR(byte address, byte data[14]){ // Generate the lfsr based checksum. I have much more research to do with this.
+byte ATA68_genLFSR(byte address, byte *DataIn) // Generate the lfsr based checksum
+{ 
   // use
   // address = adress sent to ata68. becomes forst bit sent to lfsr.
-  // DATA = input data for LFSR conversion. ranges from 2-15 bytes
-  // output = LFSR chechsum
+  // DATA = input data for LFSR conversion. ranges from 1-15 bytes (&pointer)
+  // output = 8 bit LFSR checksum
 
   // x^8+x^2+x+1
   // bitstream in MSBF - xor - DR - xor - DR - xor - DR - DR - DR - DR - DR - feedback to xor
-
-  byte LFSR; // byte to store & minipulate the lfsr output - should this be a bit feild?
+/*
+byte data = 170; //value to transmit, binary 10101010
+byte mask = 1; //our bitmask
   
-
-  for(int i=0; i<length; i++){
-  
+  for (mask = 00000001; mask>0; mask <<= 1) { //iterate through bit mask
+    if (data & mask) // if bitwise AND resolves to true
+       { LFSR = LFSR | 0x80; } // set incoming bit to 1. bit is otherwise left at 0
   }
+  
+  
+  struct spiaccess{  // one datatype for whole spi access. should it just be one byte array with a variable amount of bytes?
+    uint8_t address;
+    uint8_t data[?]:
+  }
+    
+*/
+
+   byte data; //element to combine DataIn and address into one bitstream
+
+    //byte length; //length of data in bits.
+    byte mask = data | 1; // make sure to clear out data to just leave size full of zeros
+    uint8_t LFSR = 0x00; // byte to store & minipulate the lfsr output
+ 
+    //for(byte i=0; i<length; i++)
+    for (mask = 00000001; mask>0; mask <<= 1) //iterate through bit mask until bit is pushed out the end.
+    {
+        boolean lsb = LFSR & 1; // Get LSB / the output bit
+        LFSR >> 1;              // shift
+        
+        if (data & mask)        // if selected bit is true...
+           { LFSR = LFSR | 0x80; } // set incoming bit to 1. bit is otherwise left at 0
+           
+        if (lsb == 1)           // apply toggle mask if output bit is 1. leave it alone if bit is zero
+           { LFSR ^= 0xE0; }       // Apply toggle mask: x^8+x^2+x+1 or b11100000  
+    } 
+
+  return LFSR;
 }
 #endif
 

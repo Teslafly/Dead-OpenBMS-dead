@@ -58,16 +58,16 @@ Slave Board Features (plannned)
 * 0.25% Maximum Total Measurement Error (12 bit adc) - This will be tested in reality once the first boards are constructed.
 * Extremely low power when asleep. (<100ua)
 * Two Thermistor Inputs - One connected to an On-Board Temperature Sensor and the other one brought out to a header.
-* temperature management. software will start to pwm balance resistors of board gets too hot.
+* temperature management. software will reduce the duty cycle of the balance resistors if the board gets too hot.
 * Cell Balancing:
 ===========
-        * Balancing achieved with 10 ohm power resistors. This means ~1.8 watts power of dissipation per cell. Heatsinking is probably needed at this level for full balancing current.
-        * The onboard thermistor will reduce the duty cycle of the resistors in 25% increments (from 25-100%) to keep the board from overheating / melting.
+        * Balancing achieved with ~20 ohm resistor banks. This means ~1 watt power of dissipation per cell. Heatsinking is probably needed at this level for full balancing current on all cells.
+        * An onboard thermistor will instruct the controller to reduce the duty cycle of the resistors in 25% increments (from 25-100%) to keep the board from overheating / melting.
         * Predictive cell balancing? If a cell always needs a certain amount of energy removed while charging the board will pre-emptively balance the cell. I know of no example of this and will investigate its utility 
 
     
 
-software Goals
+Software Goals
 ===========
 * ~Readout of all individual cell voltages and analog inputs ~ DONE! (It could probably be made more efficient though)
 * Manually control system outputs 
@@ -85,15 +85,13 @@ Photos
 
 TODO:
 ===============
-* ~Actually write code for the thing~ DONE!
-* finish and post the micromaster board
+* finish and post the micromaster board -Done!
 * make a separate folder for all the kicad libraries and 3d models used in the project
 * write a blog post on teslafly.wordpress.com detailing this project.
-* make this description better
-* make some prototypes 
+* make some prototypes ~ parts have arrived.
 
 
 
 License
 ===========
-TBA
+GPL 3.0

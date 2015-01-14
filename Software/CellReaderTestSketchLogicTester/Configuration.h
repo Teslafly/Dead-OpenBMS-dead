@@ -9,7 +9,7 @@ this file contains pinouts, battery chemistry specific settings, and other impor
 #define SERIALBUFF 50 // buffer size for serial commands. This may be too large or too small.
 #define DEBUG_INFO 1 // prints debug info if set to "1". stops transmissoon of boot up matadata if set to "0".
 //#define TESTMODE //
-//#define CHECKSUM_ENABLED  // enables chcksum on spi communication with ata68. not currently supported.
+#define CHECKSUM_ENABLED  // enables chcksum on spi communication with ata68. not currently supported.
 //#define SLOWCOMMS // places a delay after any SPI communication to make it easier to troupleshoot with a logic analyser. for testing only.
 //#define SAFETY_NOSHOUTDOWN // disables system shutdown in case of a fault. You would use this for safety critical applications where the battery system can NOT be shut down.
 

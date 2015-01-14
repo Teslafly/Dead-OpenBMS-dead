@@ -316,7 +316,7 @@ Serial.print("irqTrigger");
     }
     
     #ifdef CHECKSUM_ENABLED
-    SPI.transfer(ATA68_genLFSR(Length)); // send back checksum
+    SPI.transfer(ATA68_genLFSR(Length)); // send back checksum. currently not working, do not enable.
     #endif
   
   digitalWrite(ATA_CS, HIGH); // end spi transfer by deselecting chip
@@ -354,7 +354,7 @@ uint8_t *ATA68_READ (uint8_t device, uint8_t RegAddress, uint8_t Length )
     }
     
     #ifdef CHECKSUM_ENABLED
-    SPI.transfer(ATA68_genLFSR(Length)); // send back checksum
+    SPI.transfer(ATA68_genLFSR(Length)); // send back checksum. currently not working, do not enable.
     #endif
   
   digitalWrite(ATA_CS, HIGH); // end spi transfer by deselecting chip
@@ -390,6 +390,13 @@ uint8_t ATA68_genLFSR(uint8_t length) // Generate the lfsr based checksum
 
   // x^8+x^2+x+1
   // bitstream in MSBF - xor - DR - xor - DR - xor - DR - DR - DR - DR - DR - feedback to xor
+
+
+/*  
+  for (const char * p = "Fab" ; c = *p; p++)
+    SPI.transfer (c);
+    
+*/
 
     uint8_t LFSR = 0x00; // byte to store & minipulate the lfsr output
  
