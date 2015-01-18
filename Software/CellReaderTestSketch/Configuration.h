@@ -14,8 +14,8 @@ this file contains pinouts, battery chemistry specific settings, and other impor
 
 // battery specific settings ///////////////////////
 #define BOARDCOUNT 2 // # of ATA6870N attached in series
-#define CELLCOUNT BOARDCOUNT * 6 // gets recieved # of cells. 6 per each board. do not disable unconnected cells here. May differ from actual cellcount. 
 #define EnableBalancing // enables balance function. board otherwise operates in a voltage sense only mode.
+#define UDV_TRIP 3.1 // undervoltage trip value. 
 // minvoltage(per cell)
 // maxvoltage(per cell
 // balancevoltage

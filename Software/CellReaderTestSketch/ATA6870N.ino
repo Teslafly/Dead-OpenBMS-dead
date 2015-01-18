@@ -39,10 +39,15 @@ Error codes // not quite working as of yet.
   9 ==
 */
 
+// defines to make it easier to get the transfer direction right.
+#define SEND 1
+#define RECIEVE 0
+
+
 // ata6870n register mapping
 const byte RevID = 0X00;             // Revision ID/value Mfirst, pow_on [-R 8bit]
 const byte Ctrl = 0X01;              // control register [-RW 8bit]
-const byte OpReq = 0X02;         // operation request [-RW 8bit]
+const byte OpReq = 0X02;             // operation request [-RW 8bit]
 const byte Opstatus = 0X03;          // operation status [-R 8bit]
 const byte Rstr = 0X04;              // software reset [-W 8bit]
 const byte IrqMask = 0X05;           // mask interrupt sources [-RW 8bit]
@@ -55,9 +60,35 @@ const byte UdvThreshold = 0X10;      // undervoltage detection threshold [-RW 16
 const byte DataRd16 = 0X11;          // single access to selected channel value (In channelReadSel register) [-R 16 bit]
 const byte DataRd16Burst = 0X7F;     // burst access to all channels (6 voltage, 1 temperature) -R 112bit
 
-uint8_t SPIbuffer[14]; // spi databuffer. 1 byte for control, 14 for recieved / transmitted data.
+// default register values. the datasheet is quite useful for this: http://www.atmel.com/Images/Atmel-9317-Li-Ion-Battery-Management-ATA6870N_Datasheet.pdf
+const byte Ctrl_initVal    = B00010000; // [Chksum_ena: on] [LFTimer_ena: off] [TFMODE_ena: off]
+      byte OpReq_Val   = B00001010; // [00: 6 voltage channels and temperature acquisition] [1: Select TEMP2 as input of temperature channel] [AcqV: select V(MBAT(i+1), MBAT(i)) as input of voltage channels] [noOp]  
+const byte IrqMask_initVal = B00000010; // LFTdoneMask is enabled. other masks are disabled.
+const uint16_t udvTrip_initVal = 1000; // actually define this and get function working
 
-typedef struct BurstDataType{
+
+typedef struct Ata68Settings{ // important, systemwide settings for ata6870
+  // 3 bits before
+  boolean Chksum_ena;
+  boolean LFTimer_ena;
+  // 3 bits after, new byte
+  // 2 bits before
+  uint8_t OpMode : 2; // 2 bytes
+  
+}tAta68Settings;
+
+typedef struct OpReqData{
+  boolean OpRqst : 1; // operation request. 1 for start operation, 0 for no / abort operation
+  int VoltMode : 2; // method to aquire data. usually 1. calibration is 0
+  boolean TempMode : 1; //temp sensor. 0 for sensor1, 1 for sensor 2 (on board)
+  int OpMode : 2; // cell or / and temperature aquisition. 0 for cell & temp, 1 for cell only.
+  int : 2;
+}tOpReqData;
+
+tOpReqData OpData;
+
+
+typedef struct BurstDataType{ // this needs to be flippped!
   uint16_t channel6;
   uint16_t channel5;
   uint16_t channel4;
@@ -69,6 +100,7 @@ typedef struct BurstDataType{
  
  tBurstDataType BurstRx;
  
+ 
  typedef struct BooleanCellData{
    byte : 2; // 2 padding bits for alignment.
    boolean cell[5]; // data for 6 cells. zero indexed.
@@ -76,6 +108,9 @@ typedef struct BurstDataType{
  
  tBooleanCellData UDVstatus[BOARDCOUNT-1]; // variable for storing cell undervoltage status's
  tBooleanCellData DrainLoadStatus[BOARDCOUNT-1]; // variable for storing status of cell balance resistors.
+ 
+
+ 
  
  
  // set up the SPI speed, mode and endianness for ATA6870N
@@ -100,34 +135,42 @@ SPISettings ATA68_SPIconfig(SPI_CLOCK_DIV128, MSBFIRST, SPI_MODE3);
 
 
 // higher level functions that achieve base functionality.
-void ATA68_initialize(uint16_t expectedBoardCount){
+void ATA68_initialize(uint16_t expectedBoardCount)
+{
   pinMode(ATA_CS, OUTPUT);
   digitalWrite(ATA_CS, HIGH); // end spi transfer by deselecting chip
   SPI.begin();
-  SPI.setClockDivider(SPI_CLOCK_DIV128); // slowest clock possible, 62.5khz with an 8 mhz avr on 3.3v. chip clock is 500khz and spi clock must be at least half that. and lower the more chips are added to the bus.
-  SPI.setBitOrder(MSBFIRST);
-  SPI.setDataMode(3);
+  //SPI.setClockDivider(SPI_CLOCK_DIV128); // slowest clock possible, 62.5khz with an 8 mhz avr on 3.3v. chip clock is 500khz and spi clock must be at least half that.
+  //SPI.setBitOrder(MSBFIRST);
+  //SPI.setDataMode(3);
   
-  // different way of inaiatalising spi. not used for now.  SPCR = ((1<<SPE)|(1<<MSTR)|(0<<SPR1)|(1<<SPR0)|(1<<CPOL)|(1<<CPHA));  // SPI enable, MSB first, Master, f/16, SPI Mode 1
+   uint8_t CtrlData = 0x00; // control register data
   
   #ifdef CHECKSUM_ENABLED
-  ATA68_WRITE(0, Ctrl, 0x20); // set control register with chechsum bit enabled (1)
-  #else 
-  ATA68_WRITE(0, Ctrl, 0x00); // set control register with checksum bit disabled (0)
+   CtrlData ^= 0x10; // set checksum enable bit
   #endif
   
+  for(int i=0; i <= (BOARDCOUNT - 1); i++)
+    {
+    ATA68_Transfer(i, Ctrl, &CtrlData, SEND, 1); // write the control registers of the entire string.
+    }
+
   //attachInterrupt( IRQ_INT, ATA68_IRQroutine, RISING); // attach function to interrupt. not needed at this point
   
   // should set the undervoltage threshold here too.
 }
 
 
-uint8_t ATA68_StartupInfo(boolean sendInfo){// reads chip id, scans the bus, gets useful chip settings, and checks if everything is ok. outputs error code if not.
+
+uint8_t ATA68_StartupInfo(boolean sendInfo) // reads chip id, scans the bus, gets useful chip settings, and checks if everything is ok. outputs error code if not.
+{
     uint8_t errorCode = 0; // store any generated error codes.
     
-  for(uint8_t i = 0; i <= 15; i++){// get chip id's of all chips on bus. scan whole 16 possible chips.
+  for(uint8_t i = 0; i <= 15; i++)
+  {// get chip id's of all chips on bus. scan whole 16 possible chips.
   
-    uint8_t SPIbuffer = (ATA68_READ(i, RevID, 1))[0]; // read data
+    uint8_t RevID_Data;
+    ATA68_Transfer(i,  RevID, &RevID_Data, RECIEVE, 1);
     
     // error checking goes here.
     // check that only the first chip in the bus has the master bit set
@@ -138,7 +181,7 @@ uint8_t ATA68_StartupInfo(boolean sendInfo){// reads chip id, scans the bus, get
       Serial.print("Address#");
       Serial.print(i);
       Serial.print(" --");
-      Serial.println(SPIbuffer);
+      Serial.println(RevID_Data);
       }
     
   }// end of for loop
@@ -158,72 +201,119 @@ uint8_t ATA68_StartupInfo(boolean sendInfo){// reads chip id, scans the bus, get
 
 
 
-uint16_t ATA68_readCell(uint8_t cell, uint8_t board){ // reads individual cell - this works!
-  // useage
+uint16_t ATA68_readCell(uint8_t deviceNum, uint8_t cell) // reads individual cells / temp sensors
+{ // useage
   // cell -- cell number, 0 to 5. 6 if you want to read temperature, 7 if you want to read the lft 
   // board -- board number, 0 to 15
+  // outputs adc value
  
   uint16_t voltage;
  
- if((cell >=0) && (cell < 8)){ // error checking. The first 5 msb's must remain 0.
-  ATA68_WRITE(board, ChannelReadSel, cell); // get the board to collect data
+  if((cell >=0) && (cell < 8)){ // error checking. The first 5 msb's must remain 0.
+ 
+    uint8_t OpReqData = (OpReq_Val | 1);
+ 
+    ATA68_Transfer(deviceNum, ChannelReadSel, &cell, SEND, 1); // select adc to read
+    ATA68_Transfer(deviceNum, OpReq, &OpReqData, SEND, 1); // set operation request bit to start conversion.
+    
+    
+    uint8_t statusRegData;
+    while (statusRegData | 0x01) // check if dataready bit is set. should be replaced with an interrupt based dataready check.
+    {
+      delay(10); //allow the chip to collect data. this value is not fine tuned and is only meant to allow this function to work.
+      // 8.2ms conversion time according to datasheet.
+      // should actually wait for interrupt in a future version of code. a delay like this could cause problems.
   
-  delay(10); //allow the chip to collect data. this value is not fine tuned and is only meant to allow this function to work.
-
-  uint8_t *SPIbuffer = ATA68_READ(board, DataRd16, 2);
+      ATA68_Transfer(deviceNum, statusReg, &statusRegData, RECIEVE, 1); 
+    }
+    
+    uint8_t Vbuffer[2];
+    ATA68_Transfer(deviceNum, DataRd16, &Vbuffer[0], RECIEVE, 2); 
   
-  voltage = (SPIbuffer[0] * 256) + SPIbuffer[1]; // convert the 2 buffer bytes into one 16 bit voltage value.
- }else{
-  voltage = 0; // if error checking fails, return somthing clearly out of range.
- }
-   return voltage; 
+    voltage = (Vbuffer[0] * 256) + Vbuffer[1]; // convert the 2 buffer bytes into one 16 bit voltage value.
+  }else{
+    voltage = 0; // if error checking fails, return somthing clearly out of range.
+  }
+  return voltage; 
 }
+
 
 
 //////////////////////////////
 // read all cell voltages
 //////////////////////////////
-void ATA68_readAllvoltages(uint16_t cellcount){
+/*void ATA68_readAllvoltages(uint16_t cellcount){
   uint16_t cellvoltages[cellcount]; // store raw cell adc values here.
   char buffer[2];
   
   for(uint8_t i = 0; i <= BOARDCOUNT; i++){ //run once for every board
   //ATA68_READ(i, ); 
   }
-}
-
-uint8_t ATA68_bulkRead(uint8_t board){
-
-  //BurstRx
-//ATA68_WRITE(); // get the board to collect data
-
-uint8_t *SPIbuffer = ATA68_READ(board, DataRd16Burst, 14);
-
-tBurstDataType* pBatteryData = (tBurstDataType*) SPIbuffer;
-Serial.print(pBatteryData->temperature);
-
-//BurstRx
-}
+}*/
 
 
-////////////////////////////////////////
-// function to compare the voltages of the cells and balance them
-////////////////////////////////////////
-void ATA68_balance(uint16_t balanceVoltage, uint16_t maxDutyCycle){ // still figuring out how I want to do balancing.
+
+uint8_t ATA68_bulkRead(uint8_t deviceNum)
+{
+  uint8_t OpReqData = (OpReq_Val | B00001011 );
+  ATA68_Transfer(deviceNum, OpReq, &OpReqData, SEND, 1); // set operation request bit to start conversion.
+
+  //wait for interrupt.
+  uint8_t statusRegData;
+  while (statusRegData | 0x01) // check if dataready bit is set. should be replaced with an interrupt based dataready check.
+    {
+      delay(10); //allow the chip to collect data. this value is not fine tuned and is only meant to allow this function to work.
+      // 8.2ms conversion time according to datasheet.
+      // should actually wait for interrupt in a future version of code. a delay like this could cause problems.
   
+      ATA68_Transfer(deviceNum, statusReg, &statusRegData, RECIEVE, 1); 
+    }
+    
+    uint8_t BurstBuffer[14]; 
+    ATA68_Transfer(deviceNum, DataRd16Burst, &BurstBuffer[0], RECIEVE, 14); 
+    tBurstDataType* pBatteryData = (tBurstDataType*) BurstBuffer;
+    Serial.print("Burst temperature = ");
+    Serial.print(pBatteryData->temperature);
 }
 
+
+
+
+
 /////////////////////////////////////
-// function to turn on the balance resistors with a timer
+// function to turn on the balance resistors
 /////////////////////////////////////
-void ATA68_ResistorControl(uint8_t device, uint8_t cells, uint8_t timer){
+void ATA68_ResistorControl(uint8_t deviceNum, uint8_t cells){
   // device = device number. device 0-15. 
   // cells = cells to drain. this is 8 bits with the lsb being cell 1 and bit 6 being cell 6. 1 for load on, 0 for load off)
   
-  if (cells <= 63) // check that upper 2 bits are 0. will rework this function with bitfeild later.
+  if (cells <= 63) // check that upper 2 bits are 0. will rework this function with bitfeild in the future.
   {
-     ATA68_WRITE(device, ChannelDischSel, cells); // write resistor values.
+    ATA68_Transfer(deviceNum, ChannelDischSel, &cells, SEND, 1); 
   }
+}
+
+//////////////////////////////////////////////////
+byte ATA68_GetOpStatus(uint8_t deviceNum)// get operation status
+{ //useage
+  // output:
+  // 0 = no operation
+  // 1 = ongoing operation
+  // 2 = operation finished
+  // 3 = operation failed/was cancled. result not available.
+  
+  uint8_t OpStatusData;
+  ATA68_Transfer(deviceNum, Opstatus, &OpStatusData, RECIEVE, 1); 
+  return OpStatusData;
+}
+
+
+
+byte ATA68_getStatus(uint8_t deviceNum)
+{
+  uint8_t statusRegData;
+  ATA68_Transfer(deviceNum, statusReg, &statusRegData, RECIEVE, 1);
+  return statusRegData;
 }
 
 
@@ -259,18 +349,25 @@ const byte statusReg = 0X06;         // status interrupt sources [-R 8bit]
 }
 
 
-/*
-void ATA68_status(){
-  // add stuff here to read the opstatus register. not sure how I want to pass returned variables yet, although this needs to be checked before reading data / starting processess.
+
+
+void ATA68_SetUdvTrip(int LowVoltage) // set the low voltage trip point in the ATA6870N
+{ // useage
+  // binary value of low voltage trip point.
+  
+  uint8_t UdvThreshData[2] = {(LowVoltage & 0xff), (LowVoltage >> 8)} ; // turn the 16 bit int into 2 bytes.
+
+  for(int deviceNum; deviceNum < BOARDCOUNT; deviceNum++) // iterate through all modules in the string.
+  {
+    ATA68_Transfer(deviceNum, UdvThreshold, &UdvThreshData[0], SEND, 2);
+  }
 }
-*/
 
 void ATA68_SelectTempSensor(uint8_t board, boolean TempBit) // select temparature sensor. 1 or 0
 { 
   // useage
   // board -- board number, 0 to 15
   // TempBit -- temperature sensor. 1 for external, 0 for internal. (check the wiring on this, could be backwards)
-  
 }
 
 
@@ -294,75 +391,54 @@ Serial.print("irqTrigger");
 }
 
 
-//////////////////////////////////////////////
-// function for pushing data to the ata6870n. Only accepts 8 bit values.
- void ATA68_WRITE(uint8_t device, uint8_t address, uint8_t data)
- {
-  // device = device number. device 0-15. will return an error if input is not within this value.
-  // control = adress of the register we want to write/read data from. The last bit is the read/write control. (0 for read)
-  // data = the data we want to send to the ata68.
-
-  const int Length = 2; // placeholder for now.
-  SPIbuffer[0] = (address << 1)| 1; // shift register address one over to make room for read/write bit. [1 for write, 0 for read]
-  SPIbuffer[1] = data;
-  
-  SPI.transfer(0x00);// somthing that pulses out 4+ clock ticks ptobably needs to go here according to the datasheet.
-  digitalWrite(ATA_CS, LOW);  // start spi transfer by selecting chip
-
-    ATA68_Select(device);
-    
-    for (int i = 0; i <= Length; i++) {  //recieve actual data
-      SPI.transfer(SPIbuffer[i]);
-    }
-    
-    #ifdef CHECKSUM_ENABLED
-    SPI.transfer(ATA68_genLFSR(Length)); // send back checksum
-    #endif
-  
-  digitalWrite(ATA_CS, HIGH); // end spi transfer by deselecting chip
-  SPI.transfer(0x00);// somthing that pulses out 4+ clock ticks ptobably needs to go here according to the datasheet.
-}
-
-
-
-
- 
 
 ///////////////////////////////////////////////////////////
-// function for getting data out of the ata6870n
-uint8_t *ATA68_READ (uint8_t device, uint8_t RegAddress, uint8_t Length )
+// function for transferring data to and from the ATA6870N
+void ATA68_Transfer (uint8_t deviceNum, uint8_t regAddress, uint8_t *SPIbuffer, boolean RW, uint8_t length )
 {
-  // device = device number. device 0-15. will return an error if input is not within this value.
-  // address = adress of the register we want to write/read data from. The last bit is the read/write control. (0 for read)
+  // deviceNum = device number. Must be between 0-15 otherwise no device wll be selected.
+  // RegAddress = adress of the register we want to write/read data from. The last bit is the read/write control. (0 for read)
   // recievedLength = If I am recieving data how many bytes should I recieve? Also automatically adds padding to push bits out.
+  // *SPIbuffer = pointer to byte array to hold transmitted / recieved data. Should be cleared before reads.
+  // RW = read / write bit. 
+  // length = length in bytes of returned / transmitted data.
   
-  SPIbuffer[0] = (RegAddress << 1)| 0; // shift register address one over to make room for read/write bit and store on spibuffer
+  regAddress = (regAddress << 1)| RW; // shift register address one over to make room for read/write bit 
 
   SPI.beginTransaction(ATA68_SPIconfig); 
   SPI.transfer(0X00);//pulse out 4+ clock ticks before communication
   digitalWrite(ATA_CS, LOW);  // start spi transfer by selecting chip
 
-    ATA68_Select(device);
+    ATA68_Select(deviceNum);
     
-    SPI.transfer(SPIbuffer[0]); //select register and set r/w bit 
+    SPI.transfer(regAddress); //select register and set r/w bit 
 
-    if(Length != 0)
+    if(length != 0) // check that length is valid
     {
-      for (int i = 1; i <= (Length); i++) {  //recieve actual data
-        SPIbuffer[i] = SPI.transfer(0x00);
+      for (int i = 0; i < (length); i++) {  //recieve actual data. length = length in bytes for message
+        SPIbuffer[i] = SPI.transfer(SPIbuffer[i]); // recieve/transmit data.
       }
     }
     
     #ifdef CHECKSUM_ENABLED
-    SPI.transfer(ATA68_genLFSR(Length)); // send back checksum
+    // generate and send checksum
+      uint8_t checksum = 0x00; // byte to store & minipulate the lfsr output
+ 
+      checksum = ATA68_calcLFSR(checksum, regAddress); //run calculation of register adress
+    
+      for(uint8_t i=0; i<length; i++)
+      {
+         checksum = ATA68_calcLFSR(checksum, SPIbuffer[i]); // run calculation of data byte by byte. 
+      }
+    
+      SPI.transfer(checksum);
+      // check for bad comm interrupt in status register!
     #endif
   
   digitalWrite(ATA_CS, HIGH); // end spi transfer by deselecting chip
   SPI.transfer(0X00);//pulse out 4+ clock ticks after communication to "complete" the transaction.
   SPI.endTransaction();
 
-
-  return SPIbuffer; //return recieved data array
 }
 
 
@@ -373,41 +449,33 @@ void ATA68_Select (uint8_t StringAddress) // selects device in string, transfers
 
   uint16_t stackAddress = 0x0001 << StringAddress; // Address of selected chip. First byte is shifted left once for each chip increment
   
-  //select device#, recieve irq data, and add activated irq bits to the irqStore "list"
+  // select device#, recieve irq data, and add activated irq bits to the irqStore "list"
   irqStore = irqStore | (SPI.transfer(stackAddress >> 8) * 256); // transcieve first address byte
   irqStore = irqStore | SPI.transfer(stackAddress & 0xFF); // trancieve second adress byte.
 }
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
-#ifdef CHECKSUM_ENABLED
-uint8_t ATA68_genLFSR(uint8_t length) // Generate the lfsr based checksum
-{ 
-  // use
-  // address = adress sent to ata68. becomes forst bit sent to lfsr.
-  // DATA = input data for LFSR conversion. ranges from 1-15 bytes (&pointer)
-  // output = 8 bit LFSR checksum
-
+uint8_t ATA68_calcLFSR(uint8_t Lfsr, uint8_t data) // runs LSFSR chscksum on provided data
+{ // useage
+  // Lfsr = starting point for calculation. pass in the result of the last calculation to string calculations together.
+  // data = data that will get calculated into the checksum
+  // output = calculated checksum
+  
   // x^8+x^2+x+1
   // bitstream in MSBF - xor - DR - xor - DR - xor - DR - DR - DR - DR - DR - feedback to xor
-
-    uint8_t LFSR = 0x00; // byte to store & minipulate the lfsr output
- 
-    for(uint8_t i=0; i<length; i++)
-    {
-      for (uint8_t mask = 0x01; mask>0; mask <<= 1) //iterate through bit mask until bit is pushed out the end.
+  
+  for (uint8_t mask = 0x01; mask>0; mask <<= 1) // iterate through bit mask until bit is pushed out the end.
       { // This function is loosely based on example code provided by wikipedia. http://en.wikipedia.org/wiki/Linear_feedback_shift_register
-          boolean lsb = LFSR & 1; // Get LSB / the output bit
-          LFSR >> 1;              // shift
+          boolean lsb = Lfsr & 1; // Get LSB / the output bit
+          Lfsr >> 1;              // shift
           
-          if (SPIbuffer[i] & mask)        // if selected bit is true...
-             { LFSR = LFSR | 0x80; } // set incoming bit to 1. bit is otherwise left at 0
+          if (data & mask)        // if selected bit is true...
+             { Lfsr = Lfsr | 0x80; } // set incoming bit to 1. bit is otherwise left at 0
            
           if (lsb == 1)           // apply toggle mask if output bit is 1. leave it alone if bit is zero
-             { LFSR ^= 0xE0; }       // Apply toggle mask: x^8+x^2+x+1 or b11100000  
+             { Lfsr ^= 0xE0; }       // Apply toggle mask: x^8+x^2+x+1 or b11100000  
       } 
-    }
-  return LFSR;
+  return Lfsr;  
 }
-#endif
 

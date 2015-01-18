@@ -6,6 +6,7 @@ has a bunch of other junk laying aroung for not quite implemented features.
 
 funcions that need to be implemented:
 Near future:
+-- fix zero indexing of arrays and cells
 --ATA6870N communication implemented as a "sudo" library **DONE**
 --initalisation error detection (detect missing modules, etc.)*-sort of there, but only prints out diagnostics.
 --cell voltage measurement - sort of working. *-burst mode in  progress
@@ -30,7 +31,7 @@ Code created by: Marshall Scholz (aka, "Teslafly")
 and contributed to by: (insert yout name here) - nobody yet.
 
 
-  {one line to give the program's name and a brief idea of what it does.} - still need to fill this out.
+  CellReaderTestSketch. The beginning test software and library for communicating with the ATA6870N BMS IC
     Copyright (C) 2014  Marshall Scholz
 
     This program is free software: you can redistribute it and/or modify
@@ -61,7 +62,9 @@ formatting
 String SerialBuffer = "";         // a string to hold incoming data
 boolean SerialComplete = false;  // whether the string is complete
 
-int cellvoltage[CELLCOUNT];// array to store all the cellvoltages.
+uint16_t cellVoltage[(BOARDCOUNT * 6) - 1];// array to store all the cellvoltages.
+uint16_t pcbTemps [BOARDCOUNT - 1]; // array for storing system temperatures. 
+uint16_t extTemps [BOARDCOUNT - 1]; // array for storing external temperature measurements.
 
 int irqStore; // global variable to store irq results. make this not be overwritten each spi transfer, but rather added to until it is read and cleared. (if interrupts are used at all)
 uint8_t mode = 0;// system modes. modes listed below // not used right now.
@@ -113,10 +116,11 @@ void loop(){
   //  /* 
   parseComms(); 
   
-    for(int i=0; i < BOARDCOUNT ; i++) { // read all cell voltages. (yes I know this is horribly innefficent, but it will have to suffice until I get burstmode working.)
+    for(int i=0; i < BOARDCOUNT ; i++) 
+    { // read all cell voltages. (yes I know this is horribly innefficent, but it will have to suffice until I get burstmode working.)
     
     for(int c=0; c<6; c++){
-    cellvoltage[6*i+c] = ATA68_readCell(c,i);
+    cellVoltage[6*i+c] = ATA68_readCell(i,c);
     //delay(1000);
     }
   }
@@ -124,13 +128,29 @@ void loop(){
   
   // transmit all cell voltages over serial ports. voltages are not scaled/modified in any way and may look like garbage.
   
-  for(int i=0; i <= CELLCOUNT; i++){
+  for(int i=0; i <= (BOARDCOUNT * 6); i++)
+  {
   
   Serial.print("cell");
   Serial.print(i);
   Serial.print(" = ");
-  Serial.println(cellvoltage[i]);
+  Serial.println(cellVoltage[i]);
   }
+  
+  delay(1000);
+  
+  // test cell balance loads.
+   for(int i=0; i < BOARDCOUNT ; i++) // iterate through connected boards. 
+    {
+      for (uint8_t drain = 0x01; drain <= 63; drain <<= 1) // iterate through cells by bitshifting active cell until the "1" reaches the 6th bit.
+      {
+        ATA68_ResistorControl(i, drain); // send command
+        
+        delay(500); // allow time to observe tap resistor activating.
+      }
+    }
+  
+  
   
   Serial.println("debug info");
   Serial.print("irqStore = ");
