@@ -7,8 +7,9 @@ this file handles all of the communicationn, parsing, and management of the ATA6
 // spi speed is set to lowest speed. (for now) For reliability and reducing potential problems resulting from high clock speeds while testing.
 // chip is selected when cs line is held LOW.
 // clock specifics are: 
-// CPOL = 1?
-// CPHA = 1?
+// CPOL = 0
+// CPHA = 1
+// spi mode = 0
 
 
 // potential gotchya's
@@ -43,6 +44,8 @@ Error codes // not quite working as of yet.
 #define SEND 1
 #define RECIEVE 0
 
+// set up the SPI speed, mode and endianness for ATA6870N
+SPISettings ATA68_SPIconfig(SPI_CLOCK_DIV128, MSBFIRST, SPI_MODE0); 
 
 // ata6870n register mapping
 const byte RevID = 0X00;             // Revision ID/value Mfirst, pow_on [-R 8bit]
@@ -62,7 +65,7 @@ const byte DataRd16Burst = 0X7F;     // burst access to all channels (6 voltage,
 
 // default register values. the datasheet is quite useful for this: http://www.atmel.com/Images/Atmel-9317-Li-Ion-Battery-Management-ATA6870N_Datasheet.pdf
 const byte Ctrl_initVal    = B00010000; // [Chksum_ena: on] [LFTimer_ena: off] [TFMODE_ena: off]
-      byte OpReq_Val   = B00001010; // [00: 6 voltage channels and temperature acquisition] [1: Select TEMP2 as input of temperature channel] [AcqV: select V(MBAT(i+1), MBAT(i)) as input of voltage channels] [noOp]  
+      //byte OpReq_Val   = B00001010; // [00: 6 voltage channels and temperature acquisition] [1: Select TEMP2 as input of temperature channel] [AcqV: select V(MBAT(i+1), MBAT(i)) as input of voltage channels] [noOp]  
 const byte IrqMask_initVal = B00000010; // LFTdoneMask is enabled. other masks are disabled.
 const uint16_t udvTrip_initVal = 1000; // actually define this and get function working
 
@@ -106,15 +109,11 @@ typedef struct BurstDataType{ // this needs to be flippped!
    boolean cell[5]; // data for 6 cells. zero indexed.
  }tBooleanCellData;
  
- tBooleanCellData UDVstatus[BOARDCOUNT-1]; // variable for storing cell undervoltage status's
- tBooleanCellData DrainLoadStatus[BOARDCOUNT-1]; // variable for storing status of cell balance resistors.
- 
-
+ tBooleanCellData UDVstatus[BALANCERCOUNT-1]; // variable for storing cell undervoltage status's
+ tBooleanCellData DrainLoadStatus[BALANCERCOUNT-1]; // variable for storing status of cell balance resistors.
  
  
  
- // set up the SPI speed, mode and endianness for ATA6870N
-SPISettings ATA68_SPIconfig(SPI_CLOCK_DIV128, MSBFIRST, SPI_MODE3); 
 
 
  // status register bits.
@@ -150,7 +149,7 @@ void ATA68_initialize(uint16_t expectedBoardCount)
    CtrlData ^= 0x10; // set checksum enable bit
   #endif
   
-  for(int i=0; i <= (BOARDCOUNT - 1); i++)
+  for(int i=0; i <= (BALANCERCOUNT - 1); i++)
     {
     ATA68_Transfer(i, Ctrl, &CtrlData, SEND, 1); // write the control registers of the entire string.
     }
@@ -180,8 +179,8 @@ uint8_t ATA68_StartupInfo(boolean sendInfo) // reads chip id, scans the bus, get
       if(sendInfo == 1) { // send useful data about chips
       Serial.print("Address#");
       Serial.print(i);
-      Serial.print(" --");
-      Serial.println(RevID_Data);
+      Serial.print(" -- B");
+      Serial.println(RevID_Data, BIN);
       }
     
   }// end of for loop
@@ -200,7 +199,7 @@ uint8_t ATA68_StartupInfo(boolean sendInfo) // reads chip id, scans the bus, get
 
 
 
-
+/*
 uint16_t ATA68_readCell(uint8_t deviceNum, uint8_t cell) // reads individual cells / temp sensors
 { // useage
   // cell -- cell number, 0 to 5. 6 if you want to read temperature, 7 if you want to read the lft 
@@ -218,16 +217,18 @@ uint16_t ATA68_readCell(uint8_t deviceNum, uint8_t cell) // reads individual cel
     
     
     uint8_t statusRegData;
-    while (statusRegData | 0x01) // check if dataready bit is set. should be replaced with an interrupt based dataready check.
+   // while (statusRegData | 0x01) // check if dataready bit is set. should be replaced with an interrupt based dataready check.
+    if(1)
     {
-      delay(10); //allow the chip to collect data. this value is not fine tuned and is only meant to allow this function to work.
+      ATA68_Transfer(deviceNum, statusReg, &statusRegData, RECIEVE, 1); 
+      
+      delay(20); //allow the chip to collect data. this value is not fine tuned and is only meant to allow this function to work.
       // 8.2ms conversion time according to datasheet.
       // should actually wait for interrupt in a future version of code. a delay like this could cause problems.
-  
-      ATA68_Transfer(deviceNum, statusReg, &statusRegData, RECIEVE, 1); 
     }
+     
     
-    uint8_t Vbuffer[2];
+    uint8_t Vbuffer[1];
     ATA68_Transfer(deviceNum, DataRd16, &Vbuffer[0], RECIEVE, 2); 
   
     voltage = (Vbuffer[0] * 256) + Vbuffer[1]; // convert the 2 buffer bytes into one 16 bit voltage value.
@@ -236,7 +237,7 @@ uint16_t ATA68_readCell(uint8_t deviceNum, uint8_t cell) // reads individual cel
   }
   return voltage; 
 }
-
+*/
 
 
 //////////////////////////////
@@ -246,34 +247,81 @@ uint16_t ATA68_readCell(uint8_t deviceNum, uint8_t cell) // reads individual cel
   uint16_t cellvoltages[cellcount]; // store raw cell adc values here.
   char buffer[2];
   
-  for(uint8_t i = 0; i <= BOARDCOUNT; i++){ //run once for every board
+  for(uint8_t i = 0; i <= BALANCERCOUNT; i++){ //run once for every board
   //ATA68_READ(i, ); 
   }
 }*/
 
 
 
-uint8_t ATA68_bulkRead(uint8_t deviceNum)
-{
-  uint8_t OpReqData = (OpReq_Val | B00001011 );
-  ATA68_Transfer(deviceNum, OpReq, &OpReqData, SEND, 1); // set operation request bit to start conversion.
+uint8_t ATA68_bulkRead(boolean voltMode, boolean tempBit) // reads all cell voltages and selected temperature senors into appropriate arrays.
+{ // useage
+  // volt mode = calibration or regular aquisition. 0 for calibration, 1 for regular.
+  
+  
+  uint8_t OpReqData = (B00000001 | (voltMode << 1) | (tempBit << 3));
+  
+  for(byte deviceNum; deviceNum < BALANCERCOUNT; deviceNum++) // iterate through connected boards.
+  {
+    ATA68_Transfer(deviceNum, OpReq, &OpReqData, SEND, 1); // set operation request bit to start conversion.
+  
 
-  //wait for interrupt.
-  uint8_t statusRegData;
-  while (statusRegData | 0x01) // check if dataready bit is set. should be replaced with an interrupt based dataready check.
-    {
-      delay(10); //allow the chip to collect data. this value is not fine tuned and is only meant to allow this function to work.
+    //wait for interrupt.
+    uint8_t statusRegData;
+  
+    // while (statusRegData | 0x01) // check if dataready bit is set. should be replaced with an interrupt based dataready check.
+    if(1==1) {
+  
+      //ATA68_Transfer(deviceNum, statusReg, &statusRegData, RECIEVE, 1); 
+      
+      delay(30); //allow the chip to collect data. this value is not fine tuned and is only meant to allow this function to work.
       // 8.2ms conversion time according to datasheet.
       // should actually wait for interrupt in a future version of code. a delay like this could cause problems.
-  
-      ATA68_Transfer(deviceNum, statusReg, &statusRegData, RECIEVE, 1); 
+      
     }
     
-    uint8_t BurstBuffer[14]; 
-    ATA68_Transfer(deviceNum, DataRd16Burst, &BurstBuffer[0], RECIEVE, 14); 
+    //voltage = (Vbuffer[0] * 256) + Vbuffer[1];
+   
+    
+    byte BurstBuffer[14]; 
+    
+    //for (int i; i <= 13; i++) { BurstBuffer[i] = 0; }
+    
+    ATA68_Transfer(deviceNum, DataRd16Burst, &BurstBuffer[0], RECIEVE, 14);
+    
+    for (int i; i <= 13; i++) // print out all recieved binary values for debugging.
+    {
+     Serial.print("burst data recieved: ");
+     Serial.println(BurstBuffer[i], BIN);
+    }
+    
+    
+    
+    /*
     tBurstDataType* pBatteryData = (tBurstDataType*) BurstBuffer;
-    Serial.print("Burst temperature = ");
-    Serial.print(pBatteryData->temperature);
+    
+    Serial.print("Burst cell #1 = ");
+    Serial.println(pBatteryData->channel6, BIN);
+    
+    Serial.print("Burst cell #2 = ");
+    Serial.println(pBatteryData->channel5, BIN);
+    
+    Serial.print("Burst cell #3 = ");
+    Serial.println(pBatteryData->channel4, BIN);
+    
+    Serial.print("Burst cell #4 = ");
+    Serial.println(pBatteryData->channel3, BIN);
+    
+    Serial.print("Burst cell #5 = ");
+    Serial.println(pBatteryData->channel2, BIN);
+    
+    Serial.print("Burst cell #6 = ");
+    Serial.println(pBatteryData->channel1, BIN);
+    
+    Serial.print("Burst temp    = ");
+    Serial.println(pBatteryData->temperature, BIN);
+    */
+  }
 }
 
 
@@ -357,17 +405,20 @@ void ATA68_SetUdvTrip(int LowVoltage) // set the low voltage trip point in the A
   
   uint8_t UdvThreshData[2] = {(LowVoltage & 0xff), (LowVoltage >> 8)} ; // turn the 16 bit int into 2 bytes.
 
-  for(int deviceNum; deviceNum < BOARDCOUNT; deviceNum++) // iterate through all modules in the string.
+  for(int deviceNum; deviceNum < BALANCERCOUNT; deviceNum++) // iterate through all modules in the string.
   {
     ATA68_Transfer(deviceNum, UdvThreshold, &UdvThreshData[0], SEND, 2);
   }
 }
 
-void ATA68_SelectTempSensor(uint8_t board, boolean TempBit) // select temparature sensor. 1 or 0
+void ATA68_SelectTempSensor(uint8_t deviceNum, boolean TempBit) // select temparature sensor. 1 or 0
 { 
   // useage
   // board -- board number, 0 to 15
   // TempBit -- temperature sensor. 1 for external, 0 for internal. (check the wiring on this, could be backwards)
+  
+  
+ // ATA68_Transfer(deviceNum, UdvThreshold, &UdvThreshData[0], SEND, 1);
 }
 
 
@@ -445,7 +496,7 @@ void ATA68_Transfer (uint8_t deviceNum, uint8_t regAddress, uint8_t *SPIbuffer, 
 //////////////////////////////////////////////////////////////////////////////////////////
 void ATA68_Select (uint8_t StringAddress) // selects device in string, transfers address command and gets irq.
 { // useage
-  // StringAddress = device number. device 0-15. will skip communication of data is not within this value.
+  // StringAddress = device number. device 0-15. will skip communication of data is not within this value. (all 16 bits set to "0")
 
   uint16_t stackAddress = 0x0001 << StringAddress; // Address of selected chip. First byte is shifted left once for each chip increment
   
