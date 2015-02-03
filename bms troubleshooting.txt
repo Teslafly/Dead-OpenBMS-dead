@@ -1,0 +1,69 @@
+Burst cell #1 = 50176
+Burst cell #2 = 52224
+Burst cell #3 = 54272
+Burst cell #4 = 64256
+Burst cell #5 = 58112
+Burst cell #6 = 60672
+Burst temp = 44288
+debug info
+irqStore = 0
+
+Burst cell #1 = 20737
+Burst cell #2 = 22785
+Burst cell #3 = 24833
+Burst cell #4 = 45569
+Burst cell #5 = 28161
+Burst cell #6 = 31233
+Burst temp = 4353
+debug info
+irqStore = 0
+
+Burst cell #1 = 56833
+Burst cell #2 = 58881
+Burst cell #3 = 60929
+Burst cell #4 = 26626
+Burst cell #5 = 64513
+Burst cell #6 = 1794
+Burst temp = 29953
+debug info
+irqStore = 0
+
+Burst cell #1 = 27394
+Burst cell #2 = 29698
+Burst cell #3 = 31746
+Burst cell #4 = 6659
+Burst cell #5 = 35074
+Burst cell #6 = 37890
+Burst temp = 55553
+debug info
+irqStore = 0
+
+Burst cell #1 = 63490
+Burst cell #2 = 258
+Burst cell #3 = 2307
+Burst cell #4 = 52483
+Burst cell #5 = 5635
+Burst cell #6 = 8451
+Burst temp = 15874
+debug info
+irqStore = 0
+
+Burst cell #1 = 34051
+Burst cell #2 = 36099
+Burst cell #3 = 38147
+Burst cell #4 = 32772
+Burst cell #5 = 41731
+Burst cell #6 = 44803
+Burst temp = 41474
+debug info
+irqStore = 0
+
+Burst cell #1 = 4868
+Burst cell #2 = 6916
+Burst cell #3 = 8964
+Burst cell #4 = 12805
+Burst cell #5 = 12292
+Burst cell #6 = 15108
+Burst temp = 1795
+debug info
+irqStore = 0

@@ -57,10 +57,15 @@ and contributed to by: (insert yout name here) - nobody yet.
 String SerialBuffer = "";         // a string to hold incoming data
 boolean SerialComplete = false;  // whether the string is complete
 
-uint16_t cellVoltages[(BALANCERCOUNT * 6)];// array to store all the cellvoltages.
-uint16_t cellCalVals[(BALANCERCOUNT * 6)];// array to store all calibration values for cells.
+// yes, I know these are overindexed by 1. leaving out for memory overflow troubleshooting stuff
+uint16_t cellReadings[(BALANCERCOUNT * 6)];// array to store all the cellReadings.
+uint16_t cellCalVals[(BALANCERCOUNT * 6)];// array to store all calibration values for cells
 uint16_t pcbTemps [BALANCERCOUNT ]; // array for storing system temperatures. 
 uint16_t extTemps [BALANCERCOUNT ]; // array for storing external temperature measurements.
+
+float cellVoltages [(BALANCERCOUNT * 6)]; // decimal cell voltages.
+
+byte balanceStates [BALANCERCOUNT]; // states of all balance loads
 
 uint16_t irqStore; // global variable to store irq results. make this not be overwritten each spi transfer, but rather added to until it is read and cleared. (if interrupts are used at all)
 uint8_t mode = 0;// system modes. modes listed below // not used right now.
@@ -122,6 +127,8 @@ void loop(){
  // parseComms(); 
   
    
+   
+     // /*
    // test cell balance loads.
    for(int i=0; i < BALANCERCOUNT ; i++) // iterate through connected boards. 
     {
@@ -133,35 +140,36 @@ void loop(){
       }
       ATA68_ResistorControl(i, 0x00); // turn off all cells
     }
+   // */
     
+    //ATA68_ResistorControl(0, B00101001); // turn on all cells for that board.
+    //ATA68_ResistorControl(1, B00111111); // turn on all cells for that board.
     
      
   Serial.println("bulkread in progress");
-  int bkrdError = ATA68_bulkRead(&cellVoltages[0], &pcbTemps[0], BALANCERCOUNT, 1, 1); // bulk read command tester
+  int bkrdError = ATA68_bulkRead(&cellReadings[0], &pcbTemps[0], BALANCERCOUNT, 1, 1); // bulk read command tester
   Serial.println("bulkread error = ");
   Serial.println(bkrdError);
   
-  ATA68_bulkRead(&cellCalVals[0], &extTemps[0], BALANCERCOUNT, 0, 0); // calibration read tester
+  bkrdError = ATA68_bulkRead(&cellCalVals[0], &extTemps[0], BALANCERCOUNT, 0, 0); // calibration read tester
   
+  Serial.println("cal bulkread error = ");
+  Serial.println(bkrdError);
 
-  
-   // transmit all adc readings
-   Serial.println("calibration offsets");
-   for(int i=0; i < (BALANCERCOUNT * 6); i++)
+  // calculate decimal cell voltages
+  for(int cellNum = 0; cellNum < (BALANCERCOUNT * 6); cellNum++)
   {
-    Serial.print("cell");
-    Serial.print(i + 1); // turn zero index into 1 indexed.
-    Serial.print(" = ");
-    Serial.println(cellCalVals[i]);
+   cellVoltages[cellNum] = float(cellReadings[cellNum] - cellCalVals[cellNum]) / 655;
   }
+
    
-   Serial.println("cell adc readings");
+   Serial.println("cell voltages");
   for(int i=0; i < (BALANCERCOUNT * 6); i++)
   {
     Serial.print("cell");
     Serial.print(i + 1); // turn zero index into 1 indexed.
     Serial.print(" = ");
-    Serial.println(cellVoltages[i]);
+    Serial.println(cellVoltages[i], 3);
   }
   
   for(int i=0; i < BALANCERCOUNT ; i++)

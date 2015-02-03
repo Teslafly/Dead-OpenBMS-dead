@@ -233,7 +233,7 @@ uint8_t ATA68_bulkRead(uint16_t *cellAdcData, uint16_t *tempAdcData, byte icCoun
         nodata = 0;
       } 
       
-      if(exitCount < 20); // check if loop has just been spinning. 
+      if(exitCount < 30); // check if loop has just been spinning. 
       {
         bulkReadError = 4; // exits with error code 4.
         nodata = 0; // attempt to read data anayway. (status bits will cancel read if the chip really isn't ready)
@@ -327,8 +327,8 @@ byte ATA68_GetOpStatus(uint8_t deviceNum)// get operation status
   ATA68_Transfer(deviceNum, Opstatus, &OpStatusData, RECIEVE, 1); 
   
   // debugging stuff
-  Serial.print(" OPstatus = ");
-  Serial.println(OpStatusData, HEX);
+  //Serial.print(" OPstatus = ");
+  //Serial.println(OpStatusData, HEX);
   
   return OpStatusData;
 }
@@ -340,8 +340,8 @@ byte ATA68_getStatus(uint8_t deviceNum) // read the status register
   uint8_t statusRegData = 0XFF;
   ATA68_Transfer(deviceNum, statusReg, &statusRegData, RECIEVE, 1);
   
-  Serial.print("Status = ");
-  Serial.println(statusRegData, BIN);
+  //Serial.print("Status = ");
+  //Serial.println(statusRegData, BIN);
   
   return statusRegData;
 }
@@ -393,7 +393,7 @@ void ATA68_Transfer (uint8_t deviceNum, uint8_t regAddress, uint8_t *SPIbuffer, 
       for (int i = 0; i < (length); i++) {  //recieve actual data. length = length in bytes for message
         SPIbuffer[i] = SPI.transfer(SPIbuffer[i]); // recieve/transmit data.
       }
-    }else{Serial.print("badLength");}
+    }//else{error = 1;}
     
     #ifdef CHECKSUM_ENABLED
     // generate and send checksum
