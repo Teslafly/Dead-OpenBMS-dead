@@ -54,7 +54,7 @@ and contributed to by: (insert yout name here) - nobody yet.
 #include <Arduino.h>
 #include "Configuration.h"
 #include <SPI.h>
-#include <MemoryFree.h>
+//#include <MemoryFree.h>
 
 // variables ///////////////////////////////
 // serial communication stuff
@@ -95,14 +95,13 @@ uint8_t mode = 0;// system modes. modes listed below // not used right now.
 
 // set up devices //////////////////////////
 void setup(){
-  Serial.begin(BAUDRATE);
-  Serial.println(F("ATA6870N test sketch. initializing"));
-  // reserve bytes for incoming commands:
-  SerialBuffer.reserve(SERIALBUFF); //make space for serial commands
+ 
+  SerialBuffer.reserve(SERIALBUFF);  // reserve bytes for incoming communication
   
-  #ifdef TESTMODE
-  Serial.print(F("Board is running in Test Mode. AtA6870N communication checks disabled"));
-  #endif
+  Serial.begin(BAUDRATE);
+  Serial.println(F("ATA6870N balancer V1.0")); // splashscreen
+ 
+  
   
   ATA68_initialize(BALANCERCOUNT);
 

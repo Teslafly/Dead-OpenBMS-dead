@@ -1,4 +1,5 @@
 EESchema Schematic File Version 2
+LIBS:OSBMS MicroMaster atmega328-rescue
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -10,7 +11,6 @@ LIBS:cmos4000
 LIBS:adc-dac
 LIBS:memory
 LIBS:xilinx
-LIBS:special
 LIBS:microcontrollers
 LIBS:dsp
 LIBS:microchip
@@ -47,7 +47,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L ATMEGA328P-A IC1
+L ATMEGA328P-A-RESCUE-OSBMS_MicroMaster_atmega328 IC1
 U 1 1 5434A70A
 P 2550 2350
 F 0 "IC1" H 1800 3600 40  0000 L BNN
@@ -113,7 +113,7 @@ F 3 "" H 8100 2850 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L +3.3V #PWR01
+L +3.3V-RESCUE-OSBMS_MicroMaster_atmega328 #PWR01
 U 1 1 54358F9D
 P 10000 3300
 F 0 "#PWR01" H 10000 3260 30  0001 C CNN
@@ -124,7 +124,7 @@ F 3 "" H 10000 3300 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR02
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR02
 U 1 1 54358FB1
 P 10550 3550
 F 0 "#PWR02" H 10550 3550 30  0001 C CNN
@@ -149,7 +149,7 @@ A6
 Text GLabel 1350 2700 0    60   Input ~ 0
 A7
 $Comp
-L GND #PWR03
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR03
 U 1 1 543DF112
 P 4850 2050
 F 0 "#PWR03" H 4850 2050 30  0001 C CNN
@@ -160,7 +160,7 @@ F 3 "" H 4850 2050 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L +3.3V #PWR04
+L +3.3V-RESCUE-OSBMS_MicroMaster_atmega328 #PWR04
 U 1 1 543DF1C2
 P 1550 1150
 F 0 "#PWR04" H 1550 1110 30  0001 C CNN
@@ -171,7 +171,7 @@ F 3 "" H 1550 1150 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR05
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR05
 U 1 1 543DFD82
 P 1550 3650
 F 0 "#PWR05" H 1550 3650 30  0001 C CNN
@@ -182,7 +182,7 @@ F 3 "" H 1550 3650 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR06
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR06
 U 1 1 543E0940
 P 1550 2250
 F 0 "#PWR06" H 1550 2250 30  0001 C CNN
@@ -194,7 +194,7 @@ F 3 "" H 1550 2250 60  0000 C CNN
 $EndComp
 Text GLabel 4200 1250 2    60   Input ~ 0
 D8
-Text GLabel 3950 1350 2    60   Input ~ 0
+Text GLabel 4650 1350 2    60   Input ~ 0
 D9*
 Text GLabel 3600 1450 2    60   Input ~ 0
 D10*
@@ -257,7 +257,7 @@ TXD
 Text GLabel 9650 1400 0    60   Input ~ 0
 RXD
 $Comp
-L GND #PWR07
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR07
 U 1 1 543F748F
 P 10250 1750
 F 0 "#PWR07" H 10250 1750 30  0001 C CNN
@@ -268,7 +268,7 @@ F 3 "" H 10250 1750 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L +3.3V #PWR08
+L +3.3V-RESCUE-OSBMS_MicroMaster_atmega328 #PWR08
 U 1 1 543F915B
 P 10100 1000
 F 0 "#PWR08" H 10100 960 30  0001 C CNN
@@ -285,7 +285,7 @@ SCK/13
 Text GLabel 6850 1500 0    60   Input ~ 0
 RESET
 $Comp
-L +3.3V #PWR09
+L +3.3V-RESCUE-OSBMS_MicroMaster_atmega328 #PWR09
 U 1 1 543FA4A0
 P 7800 950
 F 0 "#PWR09" H 7800 910 30  0001 C CNN
@@ -296,7 +296,7 @@ F 3 "" H 7800 950 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR010
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR010
 U 1 1 543FA4C1
 P 7800 1600
 F 0 "#PWR010" H 7800 1600 30  0001 C CNN
@@ -318,7 +318,7 @@ F 3 "" H 9550 1600 60  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L R R1
+L R-RESCUE-OSBMS_MicroMaster_atmega328 R1
 U 1 1 5440DAFF
 P 7450 1050
 F 0 "R1" V 7530 1050 40  0000 C CNN
@@ -342,7 +342,7 @@ F 3 "" H 7450 2850 60  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L +3.3V #PWR011
+L +3.3V-RESCUE-OSBMS_MicroMaster_atmega328 #PWR011
 U 1 1 545F0369
 P 7750 2250
 F 0 "#PWR011" H 7750 2210 30  0001 C CNN
@@ -353,7 +353,7 @@ F 3 "" H 7750 2250 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR012
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR012
 U 1 1 545F036F
 P 7850 3100
 F 0 "#PWR012" H 7850 3100 30  0001 C CNN
@@ -364,7 +364,7 @@ F 3 "" H 7850 3100 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L +3.3V #PWR013
+L +3.3V-RESCUE-OSBMS_MicroMaster_atmega328 #PWR013
 U 1 1 545F0FA0
 P 9550 5050
 F 0 "#PWR013" H 9550 5010 30  0001 C CNN
@@ -379,7 +379,7 @@ CS_N
 Text GLabel 3600 1250 2    50   Input ~ 0
 CS_N
 $Comp
-L FDS6892A Q1
+L FDS6892A-RESCUE-OSBMS_MicroMaster_atmega328 Q1
 U 1 1 5464D242
 P 1500 6950
 F 0 "Q1" H 1500 6801 40  0000 R CNN
@@ -390,7 +390,7 @@ F 3 "" H 1500 6950 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L FDS6892A Q1
+L FDS6892A-RESCUE-OSBMS_MicroMaster_atmega328 Q1
 U 2 1 5464D249
 P 2650 7150
 F 0 "Q1" H 2650 7001 40  0000 R CNN
@@ -405,7 +405,7 @@ D5*
 Text GLabel 2100 7200 0    60   Input ~ 0
 D6*
 $Comp
-L R R9
+L R-RESCUE-OSBMS_MicroMaster_atmega328 R9
 U 1 1 5464D25B
 P 2450 7400
 F 0 "R9" V 2530 7400 40  0000 C CNN
@@ -416,7 +416,7 @@ F 3 "" H 2450 7400 30  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L R R7
+L R-RESCUE-OSBMS_MicroMaster_atmega328 R7
 U 1 1 5464D262
 P 1300 7200
 F 0 "R7" V 1380 7200 40  0000 C CNN
@@ -427,7 +427,7 @@ F 3 "" H 1300 7200 30  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L GND #PWR014
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR014
 U 1 1 5464D273
 P 1600 7300
 F 0 "#PWR014" H 1600 7300 30  0001 C CNN
@@ -438,7 +438,7 @@ F 3 "" H 1600 7300 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR015
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR015
 U 1 1 5464D279
 P 2750 7500
 F 0 "#PWR015" H 2750 7500 30  0001 C CNN
@@ -460,7 +460,7 @@ F 3 "" H 4650 7050 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR016
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR016
 U 1 1 5464D297
 P 5450 7550
 F 0 "#PWR016" H 5450 7550 30  0001 C CNN
@@ -499,7 +499,7 @@ A1
 Text GLabel 7000 2750 0    60   Input ~ 0
 A0
 $Comp
-L R R6
+L R-RESCUE-OSBMS_MicroMaster_atmega328 R6
 U 1 1 5464D2B2
 P 1700 5700
 F 0 "R6" V 1780 5700 40  0000 C CNN
@@ -510,7 +510,7 @@ F 3 "" H 1700 5700 30  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L R R5
+L R-RESCUE-OSBMS_MicroMaster_atmega328 R5
 U 1 1 5464D2B9
 P 1700 5100
 F 0 "R5" V 1780 5100 40  0000 C CNN
@@ -521,7 +521,7 @@ F 3 "" H 1700 5100 30  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L GND #PWR019
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR019
 U 1 1 5464D2EC
 P 2100 6100
 F 0 "#PWR019" H 2100 6100 30  0001 C CNN
@@ -536,7 +536,7 @@ Text Notes 750  4600 0    60   ~ 0
 Text Notes 1800 6550 2    60   ~ 0
 Auxilary power outputs\nFor contactor/ETC
 $Comp
-L CP1 C5
+L CP1-RESCUE-OSBMS_MicroMaster_atmega328 C5
 U 1 1 5464D2FB
 P 2100 5450
 F 0 "C5" H 2150 5550 50  0000 L CNN
@@ -549,7 +549,7 @@ $EndComp
 Text GLabel 10150 4550 0    60   Input ~ 0
 D4
 $Comp
-L R R8
+L R-RESCUE-OSBMS_MicroMaster_atmega328 R8
 U 1 1 546576DE
 P 4450 7300
 F 0 "R8" V 4530 7300 40  0000 C CNN
@@ -570,7 +570,7 @@ SCL/A5
 Text GLabel 10500 4850 0    60   Input ~ 0
 SDA/A4
 $Comp
-L R R2
+L R-RESCUE-OSBMS_MicroMaster_atmega328 R2
 U 1 1 54692C2B
 P 9850 2350
 F 0 "R2" V 9930 2350 40  0000 C CNN
@@ -581,7 +581,7 @@ F 3 "" H 9850 2350 30  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L R R3
+L R-RESCUE-OSBMS_MicroMaster_atmega328 R3
 U 1 1 54692E9E
 P 9850 2500
 F 0 "R3" V 9930 2500 40  0000 C CNN
@@ -592,7 +592,7 @@ F 3 "" H 9850 2500 30  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L +3.3V #PWR020
+L +3.3V-RESCUE-OSBMS_MicroMaster_atmega328 #PWR020
 U 1 1 54693308
 P 9550 2300
 F 0 "#PWR020" H 9550 2260 30  0001 C CNN
@@ -613,7 +613,7 @@ D9*
 Text GLabel 10500 4450 0    60   Input ~ 0
 D10*
 $Comp
-L GND #PWR021
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR021
 U 1 1 5469DB42
 P 10650 5350
 F 0 "#PWR021" H 10650 5350 30  0001 C CNN
@@ -657,7 +657,7 @@ F 3 "" H 4450 5250 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR022
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR022
 U 1 1 54647FB6
 P 4450 5450
 F 0 "#PWR022" H 4450 5450 30  0001 C CNN
@@ -668,7 +668,7 @@ F 3 "" H 4450 5450 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L +3.3V #PWR023
+L +3.3V-RESCUE-OSBMS_MicroMaster_atmega328 #PWR023
 U 1 1 54648505
 P 4450 5000
 F 0 "#PWR023" H 4450 4960 30  0001 C CNN
@@ -1124,7 +1124,7 @@ Wire Wire Line
 	3050 6400 3200 6400
 Connection ~ 3050 6400
 $Comp
-L GND #PWR024
+L GND-RESCUE-OSBMS_MicroMaster_atmega328 #PWR024
 U 1 1 5465EF37
 P 3150 7000
 F 0 "#PWR024" H 3150 7000 30  0001 C CNN
@@ -1196,7 +1196,7 @@ MOSI
 Text GLabel 10450 2750 0    60   Input ~ 0
 MOSI
 $Comp
-L ZENER D1
+L ZENER-RESCUE-OSBMS_MicroMaster_atmega328 D1
 U 1 1 54694E07
 P 5250 7100
 F 0 "D1" H 5250 7200 50  0000 C CNN
@@ -1208,4 +1208,10 @@ F 3 "" H 5250 7100 60  0000 C CNN
 $EndComp
 Wire Wire Line
 	5250 6800 5250 6900
+Text GLabel 10450 3050 0    60   Input ~ 0
+400khz_clk
+Wire Wire Line
+	10650 3050 10450 3050
+Text GLabel 3950 1350 2    60   Input ~ 0
+400khz_clk
 $EndSCHEMATC

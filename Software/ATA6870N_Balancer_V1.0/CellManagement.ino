@@ -86,9 +86,9 @@ int CalcBalanceCells(float *cellVoltages, byte *balanceStates, byte *ignoredCell
         
         if(ignoredCells[deviceNum] & cellMask != 0) // check to make sure we should calculate this cell.
         { 
-          Serial.print(F("calc cell#"));
+          Serial.print(F("cell#"));
           Serial.print(cellNum);
-          Serial.print(F("  on dev#"));
+          Serial.print(F(" on dev#"));
           Serial.print(deviceNum);
           Serial.print(F(" of voltage "));
           Serial.print(cellVoltages[(deviceNum * 6) + cellNum], 3);
@@ -137,6 +137,7 @@ void balance(byte *balanceStates, byte *ignoredCells, boolean enSel)// takes bal
           drain = drain | cellMask;
         }
         
+        drain = drain & B00001111 ;
         ATA68_ResistorControl(deviceNum, drain); // send command
       }
     }

@@ -13,15 +13,14 @@ this file contains pinouts, battery chemistry specific settings, and other impor
  
 //#endif  
   
-//#define TESTMODE //
 //#define CHECKSUM_ENABLED  // enables chcksum on spi communication with ata68. May consume slightly more power and slow down spi bus.
 //#define SAFETY_NOSHOUTDOWN // disables system shutdown in case of a fault. You would use this for safety critical applications where the battery system can NOT be shut down.
 
 // battery specific settings ///////////////////////
-#define BALANCERCOUNT 2 // # of ATA6870N attached in series
+#define BALANCERCOUNT 1 // # of ATA6870N attached in series
 #define EN_BALANCING // Enables balance function. board otherwise operates in a voltage sense only mode.
 #define BAL_TOLERANCE 0.004 // balance tolerance. if cells are within this value of the lowest cell they will be considered "balanced".
-#define BAL_STARTV 3.80 // default 4.07 - balance start voltage. if cell voltage is above this it will start balancing
+#define BAL_STARTV 3.2 // default 4.07 - balance start voltage. if cell voltage is above this it will start balancing
 #define BRKN_WIRE_DETECT // broken wire detection. measures voltage, turns on cell and measures voltage again. The difference should not exceed VOLTAGEDROP. 
 #define VOLTAGEDROP 10 // voltage difference in millivolts for before / after broken wire check readings.
 #define UDV_TRIP 3.1 // undervoltage trip value.
