@@ -59,11 +59,12 @@ Slave Board Features (plannned)
 * Extremely low power when asleep. (<100ua)
 * Two Thermistor Inputs - One connected to an On-Board Temperature Sensor and the other one brought out to a header.
 * temperature management. software will reduce the duty cycle of the balance resistors if the board gets too hot.
-* Cell Balancing:
-===========
-        * Balancing achieved with ~20 ohm resistor banks. This means ~1 watt power of dissipation per cell. Heatsinking is probably needed at this level for full balancing current on all cells.
-        * An onboard thermistor will instruct the controller to reduce the duty cycle of the resistors in 25% increments (from 25-100%) to keep the board from overheating / melting.
-        * Predictive cell balancing? If a cell always needs a certain amount of energy removed while charging the board will pre-emptively balance the cell. I know of no example of this and will investigate its utility 
+
+Cell Balancing:
+==============
+* Balancing achieved with ~20 ohm resistor banks. This means ~1 watt power of dissipation per cell. Heatsinking is probably needed at this level for full balancing current on all cells.
+* An onboard thermistor will instruct the controller to reduce the duty cycle of the resistors in 25% increments (from 25-100%) to keep the board from overheating / melting.
+* Predictive cell balancing? If a cell always needs a certain amount of energy removed while charging the board will pre-emptively balance the cell. I know of no example of this and will investigate its utility 
 
     
 
