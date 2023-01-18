@@ -1,5 +1,8 @@
 THIS PROJECT IS DEAD. The avalibility of other projects and low cost off the shelf solutions has imporved significantly to where this project is no londer needed.
 
+A much more mature open source bms that I recommend is https://github.com/EnnoidMe/ENNOID-BMS that has all the features that I had wanted to implement.
+Off the shelf hardware is available for that too if you don't want to build your own.
+
 Intro
 ==========
 * This project aims to create an open source, scalable Battery management system for use in just about anything with more than 4 lithium batteries. (and currently up to 96 cells without a second master board)
